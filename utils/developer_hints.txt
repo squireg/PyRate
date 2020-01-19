@@ -1,3 +1,9 @@
+# get install script
+wget https://raw.githubusercontent.com/GeoscienceAustralia/PyRate/update-troubleshooting/scripts/nci_install.sh
+chmod +x nci_install.sh
+./nci_install.sh
+
+
 git clone git@github.com:GeoscienceAustralia/PyRate.git
 cd PyRate
 
