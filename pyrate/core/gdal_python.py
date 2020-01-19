@@ -32,7 +32,6 @@ import numexpr as ne
 from core import shared, ifgconstants as ifc, prepifg_helper
 
 gdal.SetCacheMax(2**15)
-GDAL_WARP_MEMORY_LIMIT = 2**10
 LOW_FLOAT32 = np.finfo(np.float32).min*1e-10
 log = logging.getLogger(__name__)
 
