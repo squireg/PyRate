@@ -24,7 +24,7 @@ import logging
 import math
 from math import floor
 import os
-from os.path import basename, dirname, join
+from os.path import basename, join
 import struct
 from datetime import date
 from itertools import product
@@ -33,32 +33,20 @@ from numpy import where, nan, isnan, sum as nsum, isclose
 import pyproj
 import pkg_resources
 
-from core import ifgconstants as ifc, mpiops, config as cf
+import constants
+from constants import PHASE_BAND, RADIANS, MILLIMETRES, GAMMA, ROIPAC, GDAL_X_CELLSIZE, GDAL_Y_CELLSIZE, GDAL_X_FIRST, \
+    GDAL_Y_FIRST
+from core import mpiops, config as cf
 
 VERBOSE = True
 log = logging.getLogger(__name__)
 
 from osgeo import gdal
 from osgeo import osr
-from osgeo import ogr
-from osgeo import gdalconst
-from osgeo import gdal_array
 from gdalconst import GA_Update, GA_ReadOnly
 
 gdal.UseExceptions()
 
-# Constants
-PHASE_BAND = 1
-RADIANS = 'RADIANS'
-MILLIMETRES = 'MILLIMETRES'
-GAMMA = 'GAMMA'
-ROIPAC = 'ROIPAC'
-
-# GDAL projection list
-GDAL_X_CELLSIZE = 1
-GDAL_Y_CELLSIZE = 5
-GDAL_X_FIRST = 0
-GDAL_Y_FIRST = 3
 
 def joblib_log_level(level: str) -> int:
     """
@@ -68,6 +56,7 @@ def joblib_log_level(level: str) -> int:
         return 0
     else:
         return 60
+
 
 def mkdir_p(path):
     """
@@ -295,7 +284,7 @@ class Ifg(RasterBase):
         """
         self._init_dates()
         md = self.dataset.GetMetadata()
-        self.wavelength = float(md[ifc.PYRATE_WAVELENGTH_METRES])
+        self.wavelength = float(md[constants.PYRATE_WAVELENGTH_METRES])
         self.meta_data = md
         self.nan_converted = False # This flag set True after NaN conversion
 
@@ -308,11 +297,11 @@ class Ifg(RasterBase):
             return date(year, month, day)
 
         md = self.dataset.GetMetadata()
-        datestrs = [md[k] for k in [ifc.MASTER_DATE, ifc.SLAVE_DATE]]
+        datestrs = [md[k] for k in [constants.MASTER_DATE, constants.SLAVE_DATE]]
 
         if all(datestrs):
             self.master, self.slave = [_to_date(s) for s in datestrs]
-            self.time_span = (self.slave - self.master).days/ifc.DAYS_PER_YEAR
+            self.time_span = (self.slave - self.master).days / constants.DAYS_PER_YEAR
         else:
             msg = 'Missing master and/or slave date in %s' % self.data_path
             raise IfgException(msg)
@@ -327,7 +316,7 @@ class Ifg(RasterBase):
                   'Use ifg.nodata_value = NoDataValue to set nodata_value'
             log.warning(msg)
             raise RasterException(msg)
-        if ((self.dataset.GetMetadataItem(ifc.NAN_STATUS) == ifc.NAN_CONVERTED)
+        if ((self.dataset.GetMetadataItem(constants.NAN_STATUS) == constants.NAN_CONVERTED)
                 or self.nan_converted):
             self.phase_data = self.phase_data
             self.nan_converted = True
@@ -340,7 +329,7 @@ class Ifg(RasterBase):
                 isclose(self.phase_data, self._nodata_value, atol=1e-6),
                 nan,
                 self.phase_data)
-            self.meta_data[ifc.NAN_STATUS] = ifc.NAN_CONVERTED
+            self.meta_data[constants.NAN_STATUS] = constants.NAN_CONVERTED
             self.nan_converted = True
 
     @property
@@ -380,16 +369,16 @@ class Ifg(RasterBase):
         Convert phase data units from radians to millimetres.
         """
         self.mm_converted = True
-        if self.dataset.GetMetadataItem(ifc.DATA_UNITS) == MILLIMETRES:
+        if self.dataset.GetMetadataItem(constants.DATA_UNITS) == MILLIMETRES:
             msg = '{}: ignored as previous phase unit conversion ' \
                   'already applied'.format(self.data_path)
             log.debug(msg)
             self.phase_data = self.phase_data
             return
-        elif self.dataset.GetMetadataItem(ifc.DATA_UNITS) == RADIANS:
+        elif self.dataset.GetMetadataItem(constants.DATA_UNITS) == RADIANS:
             self.phase_data = convert_radians_to_mm(self.phase_data,
                                                     self.wavelength)
-            self.meta_data[ifc.DATA_UNITS] = MILLIMETRES
+            self.meta_data[constants.DATA_UNITS] = MILLIMETRES
             # self.write_modified_phase()
             # otherwise NaN's don't write to bytecode properly
             # and numpy complains
@@ -652,7 +641,7 @@ def convert_radians_to_mm(data, wavelength):
     :return: data: converted phase data
     :rtype: ndarray
     """
-    return data * ifc.MM_PER_METRE * (wavelength / (4 * math.pi))
+    return data * constants.MM_PER_METRE * (wavelength / (4 * math.pi))
 
 
 def nanmedian(x):
@@ -677,7 +666,7 @@ def _is_interferogram(hdr):
     """
     Convenience function to determine if file is interferogram
     """
-    return ifc.PYRATE_WAVELENGTH_METRES in hdr
+    return constants.PYRATE_WAVELENGTH_METRES in hdr
 
 
 def _is_incidence(hdr):
@@ -702,9 +691,9 @@ def write_fullres_geotiff(header, data_path, dest, nodata):
     """
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
-    ifg_proc = header[ifc.PYRATE_INSAR_PROCESSOR]
-    ncols = header[ifc.PYRATE_NCOLS]
-    nrows = header[ifc.PYRATE_NROWS]
+    ifg_proc = header[constants.PYRATE_INSAR_PROCESSOR]
+    ncols = header[constants.PYRATE_NCOLS]
+    nrows = header[constants.PYRATE_NROWS]
     bytes_per_col, fmtstr = _data_format(ifg_proc, _is_interferogram(header), ncols)
     if _is_interferogram(header) and ifg_proc == ROIPAC:
         # roipac ifg has 2 bands
@@ -715,12 +704,12 @@ def write_fullres_geotiff(header, data_path, dest, nodata):
     _check_pixel_res_mismatch(header)
 
     # position and projection data
-    gt = [header[ifc.PYRATE_LONG], header[ifc.PYRATE_X_STEP], 0,
-            header[ifc.PYRATE_LAT], 0, header[ifc.PYRATE_Y_STEP]]
+    gt = [header[constants.PYRATE_LONG], header[constants.PYRATE_X_STEP], 0,
+          header[constants.PYRATE_LAT], 0, header[constants.PYRATE_Y_STEP]]
     srs = osr.SpatialReference()
-    res = srs.SetWellKnownGeogCS(header[ifc.PYRATE_DATUM])
+    res = srs.SetWellKnownGeogCS(header[constants.PYRATE_DATUM])
     if res:
-        msg = 'Unrecognised projection: %s' % header[ifc.PYRATE_DATUM]
+        msg = 'Unrecognised projection: %s' % header[constants.PYRATE_DATUM]
         raise GeotiffException(msg)
 
     wkt = srs.ExportToWkt()
@@ -789,15 +778,16 @@ def collate_metadata(header):
     """
     md = dict()
     if _is_interferogram(header):
-        for k in [ifc.PYRATE_WAVELENGTH_METRES, ifc.PYRATE_TIME_SPAN, ifc.PYRATE_INSAR_PROCESSOR, ifc.MASTER_DATE, ifc.SLAVE_DATE, ifc.DATA_UNITS, ifc.DATA_TYPE]:
+        for k in [constants.PYRATE_WAVELENGTH_METRES, constants.PYRATE_TIME_SPAN, constants.PYRATE_INSAR_PROCESSOR,
+                  constants.MASTER_DATE, constants.SLAVE_DATE, constants.DATA_UNITS, constants.DATA_TYPE]:
             md.update({k: str(header[k])})
-        if header[ifc.PYRATE_INSAR_PROCESSOR] == GAMMA:
-            for k in [ifc.MASTER_TIME, ifc.SLAVE_TIME, ifc.PYRATE_INCIDENCE_DEGREES]:
+        if header[constants.PYRATE_INSAR_PROCESSOR] == GAMMA:
+            for k in [constants.MASTER_TIME, constants.SLAVE_TIME, constants.PYRATE_INCIDENCE_DEGREES]:
                 md.update({k: str(header[k])})
     elif _is_incidence(header):
-        md.update({ifc.DATA_TYPE:ifc.INCIDENCE})
+        md.update({constants.DATA_TYPE: constants.INCIDENCE})
     else: # must be dem
-        md.update({ifc.DATA_TYPE:ifc.DEM})
+        md.update({constants.DATA_TYPE: constants.DEM})
 
     return md
 
@@ -838,7 +828,7 @@ def _check_pixel_res_mismatch(header):
     Convenience function to check equality of pixel resolution in X and Y dimensions
     """
     # pylint: disable=invalid-name
-    xs, ys = [abs(i) for i in [header[ifc.PYRATE_X_STEP], header[ifc.PYRATE_Y_STEP]]]
+    xs, ys = [abs(i) for i in [header[constants.PYRATE_X_STEP], header[constants.PYRATE_Y_STEP]]]
 
     if xs != ys:
         msg = 'X and Y cell sizes do not match: %s & %s'
@@ -899,7 +889,7 @@ def write_output_geotiff(md, gt, wkt, data, dest, nodata):
     # set spatial reference for geotiff
     ds.SetGeoTransform(gt)
     ds.SetProjection(wkt)
-    ds.SetMetadataItem(ifc.EPOCH_DATE, str(md[ifc.EPOCH_DATE]))
+    ds.SetMetadataItem(constants.EPOCH_DATE, str(md[constants.EPOCH_DATE]))
 
     # set other metadata
     ds.SetMetadataItem('DATA_TYPE', str(md['DATA_TYPE']))

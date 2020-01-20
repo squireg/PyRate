@@ -28,8 +28,6 @@ from core.prepifg_helper import PreprocessError
 
 log = logging.getLogger(__name__)
 
-GAMMA = 1
-ROIPAC = 0
 
 def main(params):
     """
@@ -54,7 +52,8 @@ def main(params):
         base_ifg_paths.append(params[cf.DEM_FILE])
 
     processor = params[cf.PROCESSOR]  # roipac or gamma
-    if processor == GAMMA: # Incidence/elevation only supported for GAMMA
+    # GAMMA = 1
+    if processor == 1: # Incidence/elevation only supported for GAMMA
         if params[cf.APS_INCIDENCE_MAP]:
             base_ifg_paths.append(params[cf.APS_INCIDENCE_MAP])
         if params[cf.APS_ELEVATION_MAP]:
@@ -105,9 +104,11 @@ def _prepifg_multiprocessing(path, xlooks, ylooks, exts, thresh, crop, params):
     Multiprocessing wrapper for prepifg
     """
     processor = params[cf.PROCESSOR]  # roipac or gamma
-    if processor == GAMMA:
+    # GAMMA = 1
+    if processor == 1:
         header = gamma.gamma_header(path, params)
-    elif processor == ROIPAC:
+    # ROIPAC = 0
+    elif processor == 0:
         header = roipac.roipac_header(path, params)
     else:
         raise PreprocessError('Processor must be ROI_PAC (0) or GAMMA (1)')

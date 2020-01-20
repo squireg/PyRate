@@ -19,7 +19,7 @@ This Python module contains a collection of generic algorithms used in PyRate
 from numpy import sin, cos, unique, histogram, diag, dot
 from scipy.linalg import qr, solve, lstsq
 from core.shared import EpochList, IfgException, PrereadIfg
-from core.ifgconstants import DAYS_PER_YEAR
+from constants import DAYS_PER_YEAR
 
 
 def is_square(arr):

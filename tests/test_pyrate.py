@@ -24,6 +24,8 @@ import tempfile
 import unittest
 from os.path import join
 import numpy as np
+
+import constants
 from . import common
 
 import core.shared
@@ -56,13 +58,13 @@ def test_transform_params():
 
 
 def test_warp_required():
-    nocrop = prepifg_helper.ALREADY_SAME_SIZE
+    nocrop = constants.ALREADY_SAME_SIZE
     assert shared.warp_required(xlooks=2, ylooks=1, crop=nocrop)
     assert shared.warp_required(xlooks=1, ylooks=2, crop=nocrop)
     assert shared.warp_required(xlooks=1, ylooks=1, crop=nocrop)
     assert not shared.warp_required(xlooks=1, ylooks=1, crop=None)
 
-    for c in prepifg_helper.CROP_OPTIONS[:-1]:
+    for c in constants.CROP_OPTIONS[:-1]:
         assert shared.warp_required(xlooks=1, ylooks=1, crop=c)
 
 

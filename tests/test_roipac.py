@@ -31,9 +31,10 @@ from osgeo import osr
 from osgeo import ogr
 from osgeo import gdalconst
 from osgeo import gdal_array
+
+import constants
 from . import common
 
-import core.ifgconstants as ifc
 from core import shared, roipac
 from core.config import (
     INPUT_IFG_PROJECTION,
@@ -122,8 +123,8 @@ class RoipacToGeoTiffTests(unittest.TestCase):
     def test_to_geotiff_ifg(self):
         # tricker: needs ifg header, and DEM one for extents
         hdrs = self.HDRS.copy()
-        hdrs[ifc.PYRATE_DATUM] = 'WGS84'
-        hdrs[ifc.DATA_TYPE] = ifc.ORIG
+        hdrs[constants.PYRATE_DATUM] = 'WGS84'
+        hdrs[constants.DATA_TYPE] = constants.ORIG
 
         self.dest = os.path.join('tmp_roipac_ifg.tif')
         data_path = join(PREP_TEST_OBS, 'geo_060619-061002.unw')
@@ -145,11 +146,11 @@ class RoipacToGeoTiffTests(unittest.TestCase):
         date1 = date(2006, 6, 19)
         date2 = date(2006, 10, 2)
         diff = (date2 - date1).days
-        self.assertTrue(md[ifc.MASTER_DATE] == str(date1))
-        self.assertTrue(md[ifc.SLAVE_DATE] == str(date2))
-        self.assertTrue(md[ifc.PYRATE_TIME_SPAN] == str(diff / ifc.DAYS_PER_YEAR))
+        self.assertTrue(md[constants.MASTER_DATE] == str(date1))
+        self.assertTrue(md[constants.SLAVE_DATE] == str(date2))
+        self.assertTrue(md[constants.PYRATE_TIME_SPAN] == str(diff / constants.DAYS_PER_YEAR))
 
-        wavelen = float(md[ifc.PYRATE_WAVELENGTH_METRES])
+        wavelen = float(md[constants.PYRATE_WAVELENGTH_METRES])
         self.assertAlmostEqual(wavelen, 0.0562356424)
 
     def test_to_geotiff_wrong_input_data(self):
@@ -160,16 +161,16 @@ class RoipacToGeoTiffTests(unittest.TestCase):
 
     def test_bad_projection(self):
         hdrs = self.HDRS.copy()
-        hdrs[ifc.PYRATE_DATUM] = 'bad datum string'
-        hdrs[ifc.DATA_TYPE] = ifc.ORIG
+        hdrs[constants.PYRATE_DATUM] = 'bad datum string'
+        hdrs[constants.DATA_TYPE] = constants.ORIG
         self.dest = os.path.join(TEMPDIR, 'tmp_roipac_ifg2.tif')
         data_path = join(PREP_TEST_OBS, 'geo_060619-061002.unw')
         self.assertRaises(GeotiffException, write_fullres_geotiff, hdrs, data_path, self.dest, 0)
 
     def test_mismatching_cell_resolution(self):
         hdrs = self.HDRS.copy()
-        hdrs[ifc.PYRATE_X_STEP] = 0.1 # fake a mismatch
-        hdrs[ifc.PYRATE_DATUM] = 'WGS84'
+        hdrs[constants.PYRATE_X_STEP] = 0.1 # fake a mismatch
+        hdrs[constants.PYRATE_DATUM] = 'WGS84'
         data_path = join(PREP_TEST_OBS, 'geo_060619-061002.unw')
         self.dest = os.path.join(TEMPDIR, 'fake')
 
@@ -212,24 +213,24 @@ class HeaderParsingTests(unittest.TestCase):
     # short format header tests
     def test_parse_short_roipac_header(self):
         hdrs = roipac.parse_header(SHORT_HEADER_PATH)
-        self.assertEqual(hdrs[ifc.PYRATE_NCOLS], 47)
-        self.assertEqual(hdrs[ifc.PYRATE_NROWS], 72)
-        self.assertAlmostEqual(hdrs[ifc.PYRATE_LONG], 150.910)
-        self.assertEqual(hdrs[ifc.PYRATE_X_STEP], 0.000833333)
-        self.assertEqual(hdrs[ifc.PYRATE_LAT], -34.170000000)
-        self.assertEqual(hdrs[ifc.PYRATE_Y_STEP], -0.000833333)
-        self.assertEqual(hdrs[ifc.PYRATE_WAVELENGTH_METRES], 0.0562356424)
+        self.assertEqual(hdrs[constants.PYRATE_NCOLS], 47)
+        self.assertEqual(hdrs[constants.PYRATE_NROWS], 72)
+        self.assertAlmostEqual(hdrs[constants.PYRATE_LONG], 150.910)
+        self.assertEqual(hdrs[constants.PYRATE_X_STEP], 0.000833333)
+        self.assertEqual(hdrs[constants.PYRATE_LAT], -34.170000000)
+        self.assertEqual(hdrs[constants.PYRATE_Y_STEP], -0.000833333)
+        self.assertEqual(hdrs[constants.PYRATE_WAVELENGTH_METRES], 0.0562356424)
 
     def test_parse_short_header_has_timespan(self):
         # Ensures TIME_SPAN_YEAR field is added during parsing
         hdrs = roipac.parse_header(SHORT_HEADER_PATH)
-        self.assertIn(roipac.TIME_SPAN_YEAR, hdrs.keys())
+        self.assertIn(constants.TIME_SPAN_YEAR, hdrs.keys())
 
         # check time span calc
         master = date(2006, 6, 19)
         slave = date(2006, 10, 2)
-        diff = (slave - master).days / ifc.DAYS_PER_YEAR
-        self.assertEqual(diff, hdrs[roipac.TIME_SPAN_YEAR])
+        diff = (slave - master).days / constants.DAYS_PER_YEAR
+        self.assertEqual(diff, hdrs[constants.TIME_SPAN_YEAR])
 
     # long format header tests
     def test_parse_full_roipac_header(self):
@@ -239,8 +240,8 @@ class HeaderParsingTests(unittest.TestCase):
         # check DATE/ DATE12 fields are parsed correctly
         date0 = date(2006, 6, 19) # from "DATE 060619" header
         date2 = date(2006, 8, 28) # from DATE12 060619-060828
-        self.assertEqual(hdrs[ifc.MASTER_DATE], date0)
-        self.assertEqual(hdrs[ifc.SLAVE_DATE], date2)
+        self.assertEqual(hdrs[constants.MASTER_DATE], date0)
+        self.assertEqual(hdrs[constants.SLAVE_DATE], date2)
 
     def test_read_full_roipac_header2(self):
         # Tests header from cropped original dataset is parsed correctly
@@ -250,8 +251,8 @@ class HeaderParsingTests(unittest.TestCase):
     def test_xylast(self):
         # Test the X_LAST and Y_LAST header elements are calculated
         hdrs = roipac.parse_header(FULL_HEADER_PATH)
-        self.assertAlmostEqual(hdrs[roipac.X_LAST], 151.8519444445)
-        self.assertAlmostEqual(hdrs[roipac.Y_LAST], -34.625)
+        self.assertAlmostEqual(hdrs[constants.X_LAST], 151.8519444445)
+        self.assertAlmostEqual(hdrs[constants.Y_LAST], -34.625)
 
 
 if __name__ == "__main__":

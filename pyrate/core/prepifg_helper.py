@@ -22,7 +22,6 @@ the computational problem.
 # pylint: disable=too-many-arguments,invalid-name
 import os
 import shutil
-from collections import namedtuple
 from math import modf
 from numbers import Number
 from subprocess import check_call
@@ -31,28 +30,14 @@ from tempfile import mkstemp
 from numpy import array, where, nan, isnan, nanmean, float32, zeros, \
     sum as nsum
 from osgeo import gdal
-from osgeo import osr
-from osgeo import ogr
-from osgeo import gdalconst
-from osgeo import gdal_array
 
+import constants
+from constants import MINIMUM_CROP, MAXIMUM_CROP, CUSTOM_CROP, ALREADY_SAME_SIZE, CROP_OPTIONS, GRID_TOL
 from core.gdal_python import crop_resample_average
-from core import ifgconstants as ifc, config as cf
+from core import config as cf
 from core.shared import Ifg, DEM, output_tiff_filename
 import logging
 log = logging.getLogger(__name__)
-
-CustomExts = namedtuple('CustExtents', ['xfirst', 'yfirst', 'xlast', 'ylast'])
-
-
-# Constants
-MINIMUM_CROP = 1
-MAXIMUM_CROP = 2
-CUSTOM_CROP = 3
-ALREADY_SAME_SIZE = 4
-CROP_OPTIONS = [MINIMUM_CROP, MAXIMUM_CROP, CUSTOM_CROP, ALREADY_SAME_SIZE]
-
-GRID_TOL = 1e-6
 
 
 def get_analysis_extent(crop_opt, rasters, xlooks, ylooks, user_exts):
@@ -234,7 +219,7 @@ def dem_or_ifg(data_path):
     """
     ds = gdal.Open(data_path)
     md = ds.GetMetadata()
-    if ifc.MASTER_DATE in md:  # ifg
+    if constants.MASTER_DATE in md:  # ifg
         return Ifg(data_path)
     else:
         return DEM(data_path)
@@ -265,7 +250,7 @@ def _dummy_warp(renamed_path):
     """
     ifg = dem_or_ifg(renamed_path)
     ifg.open()
-    ifg.dataset.SetMetadataItem(ifc.DATA_TYPE, ifc.MULTILOOKED)
+    ifg.dataset.SetMetadataItem(constants.DATA_TYPE, constants.MULTILOOKED)
     data = ifg.dataset.ReadAsArray()
     return data, ifg.dataset
 

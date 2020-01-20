@@ -35,12 +35,15 @@ from osgeo import gdalconst
 from osgeo import gdal_array
 
 import sys
+
+import constants
+
 PYRATE_MODULE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pyrate")
 TEST_MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PYRATE_MODULE_PATH)
 sys.path.append(TEST_MODULE_PATH)
 
-from core import algorithm, ifgconstants as ifc, config as cf, timeseries, mst, stack
+from core import algorithm, config as cf, timeseries, mst, stack
 from core.shared import Ifg, nan_and_mm_convert, get_geotiff_header_info, write_output_geotiff
 
 PYRATEPATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -353,13 +356,13 @@ def write_timeseries_geotiff(ifgs, params, tsincr, pr_type):
     epochlist = algorithm.get_epochs(ifgs)[0]
 
     for i in range(tsincr.shape[2]):
-        md[ifc.EPOCH_DATE] = epochlist.dates[i + 1]
+        md[constants.EPOCH_DATE] = epochlist.dates[i + 1]
         md['SEQUENCE_POSITION'] = i+1  # sequence position
 
         data = tsincr[:, :, i]
         dest = join(params[cf.OUT_DIR], pr_type + "_" +
                     str(epochlist.dates[i + 1]) + ".tif")
-        md[ifc.DATA_TYPE] = pr_type
+        md[constants.DATA_TYPE] = pr_type
         write_output_geotiff(md, gt, wkt, data, dest, np.nan)
 
 
@@ -382,14 +385,14 @@ def write_stack_tifs(ifgs, params, res):
     gt, md, wkt = get_geotiff_header_info(ifgs[0].data_path)
     epochlist = algorithm.get_epochs(ifgs)[0]
     dest = join(params[cf.OUT_DIR], "stack_rate.tif")
-    md[ifc.EPOCH_DATE] = epochlist.dates
-    md[ifc.DATA_TYPE] = ifc.STACKRATE
+    md[constants.EPOCH_DATE] = epochlist.dates
+    md[constants.DATA_TYPE] = constants.STACKRATE
     write_output_geotiff(md, gt, wkt, rate, dest, np.nan)
     dest = join(params[cf.OUT_DIR], "stack_error.tif")
-    md[ifc.DATA_TYPE] = ifc.STACKERROR
+    md[constants.DATA_TYPE] = constants.STACKERROR
     write_output_geotiff(md, gt, wkt, error, dest, np.nan)
     dest = join(params[cf.OUT_DIR], "stack_samples.tif")
-    md[ifc.DATA_TYPE] = ifc.STACKSAMP
+    md[constants.DATA_TYPE] = constants.STACKSAMP
     write_output_geotiff(md, gt, wkt, samples, dest, np.nan)
     write_stack_numpy_files(error, rate, samples, params)
 

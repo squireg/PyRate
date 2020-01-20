@@ -31,9 +31,10 @@ from osgeo import osr
 from osgeo import ogr
 from osgeo import gdalconst
 from osgeo import gdal_array
+
+import constants
 from . import common
 
-import core.ifgconstants as ifc
 from core import shared, config as cf, gamma
 from core.config import (
     DEM_HEADER_FILE,
@@ -138,15 +139,15 @@ class GammaToGeoTiffTests(unittest.TestCase):
 
         md = ds.GetMetadata()
         self.assertEqual(len(md), 11) # 11 metadata items
-        self.assertTrue(md[ifc.MASTER_DATE] == str(date(2009, 7, 13)))
-        self.assertTrue(md[ifc.SLAVE_DATE] == str(date(2009, 8, 17)))
-        self.assertTrue(md[ifc.PYRATE_TIME_SPAN] == str(35 / ifc.DAYS_PER_YEAR))
+        self.assertTrue(md[constants.MASTER_DATE] == str(date(2009, 7, 13)))
+        self.assertTrue(md[constants.SLAVE_DATE] == str(date(2009, 8, 17)))
+        self.assertTrue(md[constants.PYRATE_TIME_SPAN] == str(35 / constants.DAYS_PER_YEAR))
         # TODO test failing
         # self.assertTrue(md[ifc.MASTER_TIME] == str(12))
         # TODO test failing
         # self.assertTrue(md[ifc.SLAVE_TIME] == str(time(12)))
 
-        wavelen = float(md[ifc.PYRATE_WAVELENGTH_METRES])
+        wavelen = float(md[constants.PYRATE_WAVELENGTH_METRES])
         self.assertAlmostEqual(wavelen, 0.05627457792190739)
 
     def test_to_geotiff_wrong_input_data(self):
@@ -159,7 +160,7 @@ class GammaToGeoTiffTests(unittest.TestCase):
 
     def test_mismatching_cell_resolution(self):
         hdrs = self.DEM_HDR.copy()
-        hdrs[ifc.PYRATE_X_STEP] = 0.1  # fake a mismatch
+        hdrs[constants.PYRATE_X_STEP] = 0.1  # fake a mismatch
         data_path = join(GAMMA_TEST_DIR, '16x20_20090713-20090817_VV_4rlks_utm.unw')
         self.dest = os.path.join(TEMPDIR, 'fake')
 
@@ -182,7 +183,7 @@ class GammaToGeoTiffTests(unittest.TestCase):
 
     def test_bad_projection(self):
         hdr = self.DEM_HDR.copy()
-        hdr[ifc.PYRATE_DATUM] = 'nonexistent projection'
+        hdr[constants.PYRATE_DATUM] = 'nonexistent projection'
         data_path = join(GAMMA_TEST_DIR, 'dem16x20raw.dem')
         self.dest = os.path.join(TEMPDIR, 'tmp_gamma_dem2.tif')
         self.assertRaises(GeotiffException, write_fullres_geotiff, hdr,
@@ -200,50 +201,50 @@ class GammaHeaderParsingTests(unittest.TestCase):
         hdrs = gamma.parse_epoch_header(path)
 
         exp_date = date(2009, 7, 13)
-        self.assertEqual(hdrs[ifc.MASTER_DATE], exp_date)
+        self.assertEqual(hdrs[constants.MASTER_DATE], exp_date)
 
         exp_wavelen = LIGHTSPEED / 5.3310040e+09
-        self.assertEqual(hdrs[ifc.PYRATE_WAVELENGTH_METRES], exp_wavelen)
+        self.assertEqual(hdrs[constants.PYRATE_WAVELENGTH_METRES], exp_wavelen)
 
         incidence_angle = 22.9671
-        self.assertEqual(hdrs[ifc.PYRATE_INCIDENCE_DEGREES], incidence_angle)
+        self.assertEqual(hdrs[constants.PYRATE_INCIDENCE_DEGREES], incidence_angle)
 
     def test_parse_gamma_dem_header(self):
         path = join(GAMMA_TEST_DIR, 'dem16x20raw.dem.par')
         hdrs = gamma.parse_dem_header(path)
 
-        self.assertEqual(hdrs[ifc.PYRATE_NCOLS], 16)
-        self.assertEqual(hdrs[ifc.PYRATE_NROWS], 20)
-        self.assertEqual(hdrs[ifc.PYRATE_LAT], -33.3831945)
-        self.assertEqual(hdrs[ifc.PYRATE_LONG], 150.3870833)
-        self.assertEqual(hdrs[ifc.PYRATE_X_STEP], 6.9444445e-05)
-        self.assertEqual(hdrs[ifc.PYRATE_Y_STEP], -6.9444445e-05)
+        self.assertEqual(hdrs[constants.PYRATE_NCOLS], 16)
+        self.assertEqual(hdrs[constants.PYRATE_NROWS], 20)
+        self.assertEqual(hdrs[constants.PYRATE_LAT], -33.3831945)
+        self.assertEqual(hdrs[constants.PYRATE_LONG], 150.3870833)
+        self.assertEqual(hdrs[constants.PYRATE_X_STEP], 6.9444445e-05)
+        self.assertEqual(hdrs[constants.PYRATE_Y_STEP], -6.9444445e-05)
 
 
 # Test data for the epoch header combination
-H0 = {ifc.MASTER_DATE : date(2009, 7, 13),
-      ifc.MASTER_TIME : time(12),
-      ifc.PYRATE_WAVELENGTH_METRES: 1.8,
-      ifc.PYRATE_INCIDENCE_DEGREES: 35.565,
+H0 = {constants.MASTER_DATE: date(2009, 7, 13),
+      constants.MASTER_TIME: time(12),
+      constants.PYRATE_WAVELENGTH_METRES: 1.8,
+      constants.PYRATE_INCIDENCE_DEGREES: 35.565,
       }
 
-H1 = {ifc.MASTER_DATE : date(2009, 8, 17),
-      ifc.MASTER_TIME : time(12, 10, 10),
-      ifc.PYRATE_WAVELENGTH_METRES: 1.8,
-      ifc.PYRATE_INCIDENCE_DEGREES: 35.56,
+H1 = {constants.MASTER_DATE: date(2009, 8, 17),
+      constants.MASTER_TIME: time(12, 10, 10),
+      constants.PYRATE_WAVELENGTH_METRES: 1.8,
+      constants.PYRATE_INCIDENCE_DEGREES: 35.56,
       }
 
-H1_ERR1 = {ifc.MASTER_DATE : date(2009, 8, 17),
-          ifc.MASTER_TIME : time(12),
-          ifc.PYRATE_WAVELENGTH_METRES: 2.4,
-          ifc.PYRATE_INCIDENCE_DEGREES: 35.56,
-          }
+H1_ERR1 = {constants.MASTER_DATE: date(2009, 8, 17),
+           constants.MASTER_TIME: time(12),
+           constants.PYRATE_WAVELENGTH_METRES: 2.4,
+           constants.PYRATE_INCIDENCE_DEGREES: 35.56,
+           }
 
-H1_ERR2 = {ifc.MASTER_DATE : date(2009, 8, 17),
-          ifc.MASTER_TIME : time(12),
-          ifc.PYRATE_WAVELENGTH_METRES: 1.8,
-          ifc.PYRATE_INCIDENCE_DEGREES: 35.76,
-          }
+H1_ERR2 = {constants.MASTER_DATE: date(2009, 8, 17),
+           constants.MASTER_TIME: time(12),
+           constants.PYRATE_WAVELENGTH_METRES: 1.8,
+           constants.PYRATE_INCIDENCE_DEGREES: 35.76,
+           }
 
 
 class HeaderCombinationTests(unittest.TestCase):
@@ -261,16 +262,16 @@ class HeaderCombinationTests(unittest.TestCase):
 
         chdr = gamma.combine_headers(hdr0, hdr1, self.dh)
 
-        exp_timespan = (18 + 17) / ifc.DAYS_PER_YEAR
-        self.assertEqual(chdr[ifc.PYRATE_TIME_SPAN], exp_timespan)
+        exp_timespan = (18 + 17) / constants.DAYS_PER_YEAR
+        self.assertEqual(chdr[constants.PYRATE_TIME_SPAN], exp_timespan)
 
         exp_date = date(2009, 7, 13)
-        self.assertEqual(chdr[ifc.MASTER_DATE], exp_date)
+        self.assertEqual(chdr[constants.MASTER_DATE], exp_date)
         exp_date2 = date(2009, 8, 17)
-        self.assertEqual(chdr[ifc.SLAVE_DATE], exp_date2)
+        self.assertEqual(chdr[constants.SLAVE_DATE], exp_date2)
 
         exp_wavelen = LIGHTSPEED / 5.3310040e+09
-        self.assertEqual(chdr[ifc.PYRATE_WAVELENGTH_METRES], exp_wavelen)
+        self.assertEqual(chdr[constants.PYRATE_WAVELENGTH_METRES], exp_wavelen)
 
     def test_fail_non_dict_header(self):
         self.assertRaises(self.err, gamma.combine_headers, H0, '', self.dh)
@@ -356,9 +357,9 @@ class TestGammaParallelVsSerial(unittest.TestCase):
             # all metadata equal
             self.assertDictEqual(s.meta_data, p.meta_data)
             # test that DATA_TYPE exists in metadata
-            self.assertIn(ifc.DATA_TYPE, s.meta_data.keys())
+            self.assertIn(constants.DATA_TYPE, s.meta_data.keys())
             # test that DATA_TYPE is MULTILOOKED
-            self.assertEqual(s.meta_data[ifc.DATA_TYPE], ifc.MULTILOOKED)
+            self.assertEqual(s.meta_data[constants.DATA_TYPE], constants.MULTILOOKED)
 
 
 if __name__ == "__main__":

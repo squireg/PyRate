@@ -41,8 +41,8 @@ import prepifg, conv2tif
 from core import config as cf
 from core.config import mlooked_path
 from core.shared import Ifg, DEM
-from core.prepifg_helper import CUSTOM_CROP, MAXIMUM_CROP, MINIMUM_CROP, ALREADY_SAME_SIZE
-from core.prepifg_helper import prepare_ifgs, _resample, PreprocessError, CustomExts
+from core.prepifg_helper import prepare_ifgs, _resample, PreprocessError
+from constants import CustomExts, MINIMUM_CROP, MAXIMUM_CROP, CUSTOM_CROP, ALREADY_SAME_SIZE
 # from tasks.utils import DUMMY_SECTION_NAME
 from core.config import (
     DEM_HEADER_FILE,

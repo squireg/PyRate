@@ -28,7 +28,8 @@ from numpy import isnan
 from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
 from scipy.interpolate import griddata
 
-from core import shared, ifgconstants as ifc, mpiops, config as cf
+import constants
+from core import shared, mpiops, config as cf
 from core.covariance import cvd_from_phase, RDist
 from core.algorithm import get_epochs
 from merge import _assemble_tiles
@@ -49,7 +50,7 @@ def _wrap_spatio_temporal_filter(ifg_paths, params, tiles, preread_ifgs):
 
     # perform some checks on existing ifgs
     log.debug('Checking APS correction status')
-    if mpiops.run_once(shared.check_correction_status, ifg_paths, ifc.PYRATE_APS_ERROR):
+    if mpiops.run_once(shared.check_correction_status, ifg_paths, constants.PYRATE_APS_ERROR):
         log.debug('Finished APS correction')
         return  # return if True condition returned
 
@@ -167,7 +168,7 @@ def _save_aps_corrected_phase(ifg_path, phase):
     ifg.open(readonly=False)
     ifg.phase_data[~np.isnan(ifg.phase_data)] = phase[~np.isnan(ifg.phase_data)]
     # set aps tags after aps error correction
-    ifg.dataset.SetMetadataItem(ifc.PYRATE_APS_ERROR, ifc.APS_REMOVED)
+    ifg.dataset.SetMetadataItem(constants.PYRATE_APS_ERROR, constants.APS_REMOVED)
     ifg.write_modified_phase()
     ifg.close()
 

@@ -20,8 +20,6 @@ This Python module contains bindings for the GDAL library
 import logging
 
 from osgeo import gdal
-from osgeo import osr
-from osgeo import ogr
 from osgeo import gdalconst
 from osgeo import gdal_array
 
@@ -29,10 +27,11 @@ from PIL import Image, ImageDraw
 import numpy as np
 import numexpr as ne
 
-from core import shared, ifgconstants as ifc, prepifg_helper
+import constants
+from constants import LOW_FLOAT32
+from core import shared, prepifg_helper
 
 gdal.SetCacheMax(2**15)
-LOW_FLOAT32 = np.finfo(np.float32).min*1e-10
 log = logging.getLogger(__name__)
 
 def coherence_masking(src_ds, coherence_ds, coherence_thresh):
@@ -333,28 +332,28 @@ def crop_resample_average(
     wkt = dst_ds.GetProjection()
 
     # TEST HERE IF EXISTING FILE HAS PYRATE METADATA. IF NOT ADD HERE
-    if not ifc.DATA_TYPE in dst_ds.GetMetadata() and hdr is not None:
+    if not constants.DATA_TYPE in dst_ds.GetMetadata() and hdr is not None:
         md = shared.collate_metadata(hdr)
     else: 
         md = dst_ds.GetMetadata()
 
     # update metadata for output
     for k, v in md.items():
-        if k == ifc.DATA_TYPE:
+        if k == constants.DATA_TYPE:
             # update data type metadata
-            if v == ifc.ORIG and coherence_path:
-                md.update({ifc.DATA_TYPE:ifc.COHERENCE})
-            elif v == ifc.ORIG and not coherence_path:
-                md.update({ifc.DATA_TYPE:ifc.MULTILOOKED})
-            elif v == ifc.DEM:
-                md.update({ifc.DATA_TYPE:ifc.MLOOKED_DEM})
-            elif v == ifc.INCIDENCE:
-                md.update({ifc.DATA_TYPE:ifc.MLOOKED_INC})
-            elif v == ifc.COHERENCE and coherence_path:
+            if v == constants.ORIG and coherence_path:
+                md.update({constants.DATA_TYPE: constants.COHERENCE})
+            elif v == constants.ORIG and not coherence_path:
+                md.update({constants.DATA_TYPE: constants.MULTILOOKED})
+            elif v == constants.DEM:
+                md.update({constants.DATA_TYPE: constants.MLOOKED_DEM})
+            elif v == constants.INCIDENCE:
+                md.update({constants.DATA_TYPE: constants.MLOOKED_INC})
+            elif v == constants.COHERENCE and coherence_path:
                 pass
-            elif v == ifc.MULTILOOKED and coherence_path:
-                md.update({ifc.DATA_TYPE:ifc.COHERENCE})
-            elif v == ifc.MULTILOOKED and not coherence_path:
+            elif v == constants.MULTILOOKED and coherence_path:
+                md.update({constants.DATA_TYPE: constants.COHERENCE})
+            elif v == constants.MULTILOOKED and not coherence_path:
                 pass
             else:
                 raise TypeError('Data Type metadata not recognised')

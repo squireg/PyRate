@@ -32,8 +32,7 @@ import itertools
 import logging
 import pathlib
 
-from core.ifgconstants import YEARS_PER_DAY
-from constants import CONV2TIF, PREPIFG, PROCESS, MERGE
+from constants import CONV2TIF, PREPIFG, PROCESS, MERGE, YEARS_PER_DAY, CustomExts
 
 _logger = logging.getLogger(__name__)
 
@@ -1636,7 +1635,6 @@ def _crop_opts(params: Dict) -> Tuple:
     """
     Convenience function for getting crop options from parameters.
     """
-    from core.prepifg_helper import CustomExts
 
     crop_opt = params[IFG_CROP_OPT]
     if crop_opt == 3:

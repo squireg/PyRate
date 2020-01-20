@@ -24,15 +24,16 @@ import pickle as cp
 from collections import OrderedDict
 import numpy as np
 
+import constants
+from constants import MASTER_PROCESS
 from core import shared, algorithm, orbital, ref_phs_est as rpe
-from core import ifgconstants as ifc, mpiops, config as cf
+from core import mpiops, config as cf
 from core import timeseries, mst, covariance as vcm_module
 from core import stack, refpixel
 
 from core.aps import _wrap_spatio_temporal_filter
 from core.shared import Ifg, PrereadIfg, get_tiles
 
-MASTER_PROCESS = 0
 log = logging.getLogger(__name__)
 
 
@@ -165,7 +166,7 @@ def _orb_fit_calc(ifg_paths, params, preread_ifgs=None):
     if preread_ifgs:  # don't check except for mpi tests
         # perform some general error/sanity checks
         log.debug('Checking Orbital error correction status')
-        if mpiops.run_once(shared.check_correction_status, ifg_paths, ifc.PYRATE_ORBITAL_ERROR):
+        if mpiops.run_once(shared.check_correction_status, ifg_paths, constants.PYRATE_ORBITAL_ERROR):
             log.debug('Finished Orbital error correction')
             return  # return if True condition returned
 
@@ -194,7 +195,7 @@ def _ref_phase_estimation(ifg_paths, params, refpx, refpy):
             f"correction ({len(ifg_paths)} provided)."
         )
 
-    if mpiops.run_once(shared.check_correction_status, ifg_paths, ifc.PYRATE_REF_PHASE):
+    if mpiops.run_once(shared.check_correction_status, ifg_paths, constants.PYRATE_REF_PHASE):
         log.debug('Finished reference phase estimation')
         return
 

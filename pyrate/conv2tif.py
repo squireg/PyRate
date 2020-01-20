@@ -29,9 +29,6 @@ from core import shared, mpiops, config as cf, gamma, roipac
 
 log = logging.getLogger(__name__)
 
-GAMMA = 1
-ROIPAC = 0
-
 
 def main(params=None):
     """
@@ -66,7 +63,9 @@ def main(params=None):
         base_ifg_paths.append(params[cf.DEM_FILE])
 
     processor = params[cf.PROCESSOR]  # roipac or gamma
-    if processor == GAMMA:  # Incidence/elevation only supported for GAMMA
+    # GAMMA = 1
+    # Note: Incidence/elevation only supported for GAMMA
+    if processor == 1:
         if params[cf.APS_INCIDENCE_MAP]:
             base_ifg_paths.append(params[cf.APS_INCIDENCE_MAP])
         if params[cf.APS_ELEVATION_MAP]:
@@ -118,9 +117,11 @@ def _geotiff_multiprocessing(unw_path, params):
 
     # Create full-res geotiff if not already on disk
     if not os.path.exists(dest):
-        if processor == GAMMA:
+        # GAMMA =1
+        if processor == 1:
             header = gamma.gamma_header(unw_path, params)
-        elif processor == ROIPAC:
+        # ROIPAC =0
+        elif processor == 0:
             header = roipac.roipac_header(unw_path, params)
         else:
             raise PreprocessError('Processor must be ROI_PAC (0) or GAMMA (1)')

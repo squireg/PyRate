@@ -24,9 +24,10 @@ import shutil
 import tempfile
 import unittest
 
+import constants
 from . import common
 
-from core import ifgconstants as ifc, config as cf
+from core import config as cf
 from core.prepifg_helper import _is_number
 from core.config import (
     DEM_HEADER_FILE,
@@ -182,11 +183,11 @@ class TestGammaVsRoipacEquality(unittest.TestCase):
                     '_{looks}rlks_{crop}cr'.format(looks=1, crop=1)):
                 # these are multilooked tifs
                 # test that DATA_STEP is MULTILOOKED
-                self.assertEqual(mdi[ifc.DATA_TYPE], ifc.MULTILOOKED)
-                self.assertEqual(mdj[ifc.DATA_TYPE], ifc.MULTILOOKED)
+                self.assertEqual(mdi[constants.DATA_TYPE], constants.MULTILOOKED)
+                self.assertEqual(mdj[constants.DATA_TYPE], constants.MULTILOOKED)
             else:
-                self.assertEqual(mdi[ifc.DATA_TYPE], ifc.ORIG)
-                self.assertEqual(mdj[ifc.DATA_TYPE], ifc.ORIG)
+                self.assertEqual(mdi[constants.DATA_TYPE], constants.ORIG)
+                self.assertEqual(mdj[constants.DATA_TYPE], constants.ORIG)
 
         self.assertEqual(c + 1, len(all_gamma_ifgs))
 

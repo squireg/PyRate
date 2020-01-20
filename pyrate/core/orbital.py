@@ -26,8 +26,9 @@ from numpy.linalg import pinv
 # from joblib import Parallel, delayed
 from scipy.linalg import lstsq
 
+import constants
 from core.algorithm import master_slave_ids, get_all_epochs
-from core import shared, ifgconstants as ifc, config as cf, prepifg_helper, mst
+from core import shared, config as cf, prepifg_helper, mst
 from core.shared import nanmedian, Ifg
 
 log = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ def remove_orbital_error(ifgs, params, preread_ifgs=None):
     if params[cf.ORBITAL_FIT_METHOD] == NETWORK_METHOD:
         mlooked_dataset = prepifg_helper.prepare_ifgs(
             ifg_paths,
-            crop_opt=prepifg_helper.ALREADY_SAME_SIZE,
+            crop_opt=constants.ALREADY_SAME_SIZE,
             xlooks=params[cf.ORBITAL_FIT_LOOKS_X],
             ylooks=params[cf.ORBITAL_FIT_LOOKS_Y],
             thresh=params[cf.NO_DATA_AVERAGING_THRESHOLD],
@@ -316,7 +317,7 @@ def _save_orbital_error_corrected_phase(ifg):
     orbital fit correction
     """
     # set orbfit tags after orbital error correction
-    ifg.dataset.SetMetadataItem(ifc.PYRATE_ORBITAL_ERROR, ifc.ORB_REMOVED)
+    ifg.dataset.SetMetadataItem(constants.PYRATE_ORBITAL_ERROR, constants.ORB_REMOVED)
     ifg.write_modified_phase()
     ifg.close()
 

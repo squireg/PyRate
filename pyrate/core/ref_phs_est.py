@@ -18,18 +18,17 @@
 This Python module implements a reference phase estimation algorithm.
 """
 import logging
-import os
 
 from joblib import Parallel, delayed
 import numpy as np
 
-from core import ifgconstants as ifc, config as cf
+import constants
+from core import config as cf
 from core.shared import joblib_log_level, nanmedian, Ifg
 from core import mpiops
 
 log = logging.getLogger(__name__)
 
-MASTER_PROCESS = 0
 
 def est_ref_phase_method2(ifg_paths, params, refpx, refpy):
     """
@@ -166,7 +165,7 @@ def _est_ref_phs_method1(phase_data, comp):
     return nanmedian(ifgv)
 
 def _update_phase_metadata(ifg):
-    ifg.meta_data[ifc.PYRATE_REF_PHASE] = ifc.REF_PHASE_REMOVED
+    ifg.meta_data[constants.PYRATE_REF_PHASE] = constants.REF_PHASE_REMOVED
     ifg.write_modified_phase()
 
 class ReferencePhaseError(Exception):

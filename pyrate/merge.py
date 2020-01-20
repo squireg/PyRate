@@ -23,22 +23,16 @@ import logging
 import pickle as cp
 import numpy as np
 from osgeo import gdal
-from osgeo import osr
-from osgeo import ogr
-from osgeo import gdalconst
-from osgeo import gdal_array
 import subprocess
 import pathlib
-import time
-from constants import REF_COLOR_MAP_PATH
-from core import shared, ifgconstants as ifc, mpiops, config as cf
+
+import constants
+from constants import REF_COLOR_MAP_PATH, MASTER_PROCESS
+from core import shared, mpiops, config as cf
 from core.config import OBS_DIR
 from core.shared import PrereadIfg
 gdal.SetCacheMax(64)
 log = logging.getLogger(__name__)
-
-# Constants
-MASTER_PROCESS = 0
 
 def main(params, rows, cols):
     """
@@ -170,13 +164,13 @@ def _save_stack(ifgs_dict, params, tiles, out_type):
     epochlist = ifgs_dict['epochlist']
     ifgs = [v for v in ifgs_dict.values() if isinstance(v, PrereadIfg)]
     dest = os.path.join(params[cf.OUT_DIR], out_type + ".tif")
-    md[ifc.EPOCH_DATE] = epochlist.dates
+    md[constants.EPOCH_DATE] = epochlist.dates
     if out_type == 'stack_rate':
-        md[ifc.DATA_TYPE] = ifc.STACKRATE
+        md[constants.DATA_TYPE] = constants.STACKRATE
     elif out_type == 'stack_error':
-        md[ifc.DATA_TYPE] = ifc.STACKERROR
+        md[constants.DATA_TYPE] = constants.STACKERROR
     else:
-        md[ifc.DATA_TYPE] = ifc.STACKSAMP
+        md[constants.DATA_TYPE] = constants.STACKSAMP
 
     rate = np.zeros(shape=ifgs[0].shape, dtype=np.float32)
 
@@ -245,26 +239,26 @@ def _merge_timeseries(rows, cols, params):
         if i < no_ts_tifs:
             for n, t in enumerate(tiles):
                 _assemble_tiles(i, n, t, tscum_g, output_dir, 'tscuml')
-            md[ifc.EPOCH_DATE] = epochlist.dates[i + 1]
+            md[constants.EPOCH_DATE] = epochlist.dates[i + 1]
             # sequence position; first time slice is #0
             md['SEQUENCE_POSITION'] = i+1
             dest = os.path.join(params[cf.OUT_DIR],
                                 'tscuml' + "_" +
                                 str(epochlist.dates[i + 1]) + ".tif")
-            md[ifc.DATA_TYPE] = ifc.CUML
+            md[constants.DATA_TYPE] = constants.CUML
             shared.write_output_geotiff(md, gt, wkt, tscum_g, dest, np.nan)
         else:
             tsincr_g = np.empty(shape=ifgs[0].shape, dtype=np.float32)
             i %= no_ts_tifs
             for n, t in enumerate(tiles):
                 _assemble_tiles(i, n, t, tsincr_g, output_dir, 'tsincr')
-            md[ifc.EPOCH_DATE] = epochlist.dates[i + 1]
+            md[constants.EPOCH_DATE] = epochlist.dates[i + 1]
             # sequence position; first time slice is #0
             md['SEQUENCE_POSITION'] = i+1
             dest = os.path.join(params[cf.OUT_DIR],
                                 'tsincr' + "_" + str(
                                     epochlist.dates[i + 1]) + ".tif")
-            md[ifc.DATA_TYPE] = ifc.INCR
+            md[constants.DATA_TYPE] = constants.INCR
             shared.write_output_geotiff(md, gt, wkt, tsincr_g, dest, np.nan)
     log.debug('Process {} finished writing {} ts (incr/cuml) tifs of '
              'total {}'.format(mpiops.rank, len(process_tifs), no_ts_tifs * 2))

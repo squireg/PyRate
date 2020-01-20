@@ -27,13 +27,14 @@ import numpy as np
 from scipy.fftpack import fft2, ifft2, fftshift
 from scipy.optimize import fmin
 
-from core import shared, ifgconstants as ifc, config as cf
+import constants
+from constants import DISTFACT
+from core import shared, config as cf
 from core.shared import PrereadIfg
 from core.algorithm import master_slave_ids
 
 # pylint: disable=too-many-arguments
-# distance division factor of 1000 converts to km and is needed to match legacy output
-DISTFACT = 1000
+
 
 log = logging.getLogger(__name__)
 
@@ -116,8 +117,8 @@ def _add_metadata(ifg, maxvar, alpha):
     Convenience function for saving metadata to ifg
     """
     md = ifg.meta_data
-    md[ifc.PYRATE_MAXVAR] = str(maxvar)
-    md[ifc.PYRATE_ALPHA] = str(alpha)
+    md[constants.PYRATE_MAXVAR] = str(maxvar)
+    md[constants.PYRATE_ALPHA] = str(alpha)
     ifg.write_modified_phase()
 
 

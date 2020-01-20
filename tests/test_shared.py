@@ -35,10 +35,12 @@ from osgeo import ogr
 from osgeo import gdalconst
 from osgeo import gdal_array
 from gdal import Open, Dataset, UseExceptions
+
+import constants
 from . import common
 
 from common import SML_TEST_TIF, SML_TEST_DEM_TIF, TEMPDIR
-from core import shared, ifgconstants as ifc, config as cf, prepifg_helper, gamma
+from core import shared, config as cf, prepifg_helper, gamma
 import prepifg
 import conv2tif
 from core.shared import Ifg, DEM, RasterException
@@ -168,7 +170,7 @@ class IfgIOTests(unittest.TestCase):
         gdal.Dataset object as Dataset has already been read in
         """
         paths = [self.ifg.data_path]
-        mlooked_phase_data = prepifg_helper.prepare_ifgs(paths, crop_opt=prepifg_helper.ALREADY_SAME_SIZE, xlooks=2, ylooks=2, write_to_disc=False)
+        mlooked_phase_data = prepifg_helper.prepare_ifgs(paths, crop_opt=constants.ALREADY_SAME_SIZE, xlooks=2, ylooks=2, write_to_disc=False)
         mlooked = [Ifg(m[1]) for m in mlooked_phase_data]
         self.assertRaises(RasterException, mlooked[0].open)
 

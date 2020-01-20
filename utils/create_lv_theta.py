@@ -27,7 +27,8 @@ from osgeo import ogr
 from osgeo import gdalconst
 from osgeo import gdal_array
 
-from core import shared, ifgconstants as ifc, gamma
+import constants
+from core import shared, gamma
 import common
 
 elevation_file = os.path.join(common.SML_TEST_GAMMA,
@@ -49,13 +50,13 @@ header = gamma.parse_epoch_header(
     os.path.join(common.SML_TEST_GAMMA, '20060828_slc.par'))
 
 
-incidence_angle = header[ifc.PYRATE_INCIDENCE_DEGREES]
-incidence_data = np.ones(shape=(dem_header[ifc.PYRATE_NROWS],
-                                dem_header[ifc.PYRATE_NCOLS])
+incidence_angle = header[constants.PYRATE_INCIDENCE_DEGREES]
+incidence_data = np.ones(shape=(dem_header[constants.PYRATE_NROWS],
+                                dem_header[constants.PYRATE_NCOLS])
                          ) * incidence_angle
 
-elevation_data = np.ones(shape=(dem_header[ifc.PYRATE_NROWS],
-                                dem_header[ifc.PYRATE_NCOLS])
+elevation_data = np.ones(shape=(dem_header[constants.PYRATE_NROWS],
+                                dem_header[constants.PYRATE_NCOLS])
                          ) * (90.0 - incidence_angle)
 
 shared.write_unw_from_data_or_geotiff(geotif_or_data=incidence_data,
@@ -67,11 +68,11 @@ shared.write_unw_from_data_or_geotiff(geotif_or_data=elevation_data,
                                       ifg_proc=1)
 
 header.update(dem_header)
-header[ifc.PYRATE_TIME_SPAN] = 0
-header[ifc.SLAVE_DATE] = 0
-header[ifc.DATA_UNITS] = 'degrees'
-header[ifc.DATA_TYPE] = ifc.INCIDENCE
-header[ifc.SLAVE_TIME] = 0
+header[constants.PYRATE_TIME_SPAN] = 0
+header[constants.SLAVE_DATE] = 0
+header[constants.DATA_UNITS] = 'degrees'
+header[constants.DATA_TYPE] = constants.INCIDENCE
+header[constants.SLAVE_TIME] = 0
 shared.write_geotiff(header=header, data_path=elevation_file,
                      dest=dest_lv_theta, nodata=np.nan)
 

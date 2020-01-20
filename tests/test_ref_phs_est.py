@@ -24,10 +24,12 @@ import sys
 import tempfile
 import unittest
 import numpy as np
+
+import constants
 from . import common
 
 import core.orbital
-from core import ifgconstants as ifc, config as cf
+from core import config as cf
 from core.ref_phs_est import ReferencePhaseError
 from core.shared import CorrectionStatusError
 import prepifg, process, conv2tif
@@ -106,7 +108,7 @@ class RefPhsTests(unittest.TestCase):
         process._ref_phase_estimation(self.ifgs, self.params, self.refpx, self.refpy)
         for ifg in self.ifgs:
             ifg.open()
-            self.assertEqual(ifg.dataset.GetMetadataItem(ifc.PYRATE_REF_PHASE), ifc.REF_PHASE_REMOVED)
+            self.assertEqual(ifg.dataset.GetMetadataItem(constants.PYRATE_REF_PHASE), constants.REF_PHASE_REMOVED)
     
     # def test_mixed_metadata_raises(self):
     #     # correct reference phase for some of the ifgs

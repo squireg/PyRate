@@ -26,8 +26,8 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 from . import common
 
-from core import shared, ref_phs_est as rpe, ifgconstants as ifc, config as cf
-import process, prepifg, conv2tif
+from core import shared, config as cf
+import process
 from core.covariance import cvd, get_vcmt, RDist
 import core.orbital
 import common
