@@ -31,7 +31,7 @@ import multiprocessing
 from shutil import copyfile
 
 from core.user_experience import break_number_into_factors
-from core.config import OBS_DIR,OUT_DIR
+from core.config import OBS_DIR, OUT_DIR
 import pathlib
 
 # Turn off MPI warning
@@ -76,7 +76,7 @@ def process_handler(config_file, rows, cols):
         if "dem" not in str(p):
             dest_paths.append(str(p))
 
-    process.process_ifgs(sorted(dest_paths), params, rows, cols)
+    process.main(sorted(dest_paths), params, rows, cols)
 
 
 def merge_handler(config_file, rows, cols):

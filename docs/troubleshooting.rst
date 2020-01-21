@@ -34,8 +34,8 @@ Error::
     File "/home/547/txf547/PyRateVenv/lib/python3.6/site-packages/Click-7.0-py3.6.egg/click/core.py", line 555, in invoke
     return callback(*args, **kwargs)
     File "/home/547/txf547/PyRateVenv/lib/python3.6/site-packages/Py_Rate-0.3.0.post3-py3.6.egg/pyrate/scripts/main.py", line 69, in linrate
-    run_pyrate.process_ifgs(sorted(dest_paths), params, rows, cols)
-    File "/home/547/txf547/PyRateVenv/lib/python3.6/site-packages/Py_Rate-0.3.0.post3-py3.6.egg/pyrate/scripts/run_pyrate.py", line 391, in process_ifgs
+    run_pyrate.main(sorted(dest_paths), params, rows, cols)
+    File "/home/547/txf547/PyRateVenv/lib/python3.6/site-packages/Py_Rate-0.3.0.post3-py3.6.egg/pyrate/scripts/run_pyrate.py", line 391, in main
     _wrap_spatio_temporal_filter(ifg_paths, params, tiles, preread_ifgs)
     File "/home/547/txf547/PyRateVenv/lib/python3.6/site-packages/Py_Rate-0.3.0.post3-py3.6.egg/pyrate/aps.py", line 63, in _wrap_spatio_temporal_filter
     spatio_temporal_filter(tsincr, ifg, params, preread_ifgs)
