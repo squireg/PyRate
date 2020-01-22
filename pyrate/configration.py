@@ -16,6 +16,7 @@
 from configparser import ConfigParser
 from default_parameters import PYRATE_DEFAULT_CONFIGRATION
 import pathlib
+import re
 
 
 def set_parameter_value(data_type, input_value, default_value, required, input_name):
@@ -49,10 +50,10 @@ def validate_parameter_value(input_name, input_value, min_value=None, max_value=
             raise ValueError("Invalid value for " + input_name + " supplied: " + input_value + ". Please provided a valid value from with in: " + str(possible_values) + ".")
     return True
 
-def validate_file_list_values(dir, fileList):
+def validate_file_list_values(dir, fileList, no_of_epochs):
 
     if dir is None:
-        raise ValueError("No value supplied for input directory: "+ str(dir))
+        raise ValueError("No value supplied for input directory: " + str(dir))
     if fileList is None:
         raise ValueError("No value supplied for input file list: " + str(fileList))
 
@@ -60,7 +61,11 @@ def validate_file_list_values(dir, fileList):
         # ignore empty lines in file
         if len(path_str) > 1:
             if not pathlib.Path.exists(dir/path_str):
-                raise ValueError("Give file name: " + path_str +" dose not exist at: " + dir)
+                raise ValueError("Give file name: " + str(path_str) +" dose not exist at: " + str(dir))
+            else:
+                matches = re.findall("(\d{8})", str(dir/path_str))
+                if len(matches) < no_of_epochs:
+                    raise ValueError("For the given file name: " + str(path_str) + " in: " + str(dir) +" the number of epochs in in file names are less the required number:"+ str(no_of_epochs))
 
 
 class Configration():
@@ -84,16 +89,17 @@ class Configration():
             self.__dict__[parameter_name] = set_parameter_value(PYRATE_DEFAULT_CONFIGRATION[parameter_name]["DataType"], self.__dict__[parameter_name], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["DefaultValue"], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["Required"], parameter_name)
             validate_parameter_value(parameter_name, self.__dict__[parameter_name], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["MinValue"], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["MaxValue"], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["PossibleValues"])
 
-        # Validate file names supplied in list exist.
-        validate_file_list_values(self.obsdir, self.ifgfilelist)
-        validate_file_list_values(self.slcFileDir, self.slcfilelist)
+        # Validate file names supplied in list exist and contain correct epochs in file names
+        validate_file_list_values(self.obsdir, self.ifgfilelist, 2)
+        validate_file_list_values(self.slcFileDir, self.slcfilelist, 1)
         if self.cohfiledir is not None or self.cohfilelist is not None:
             validate_file_list_values(self.cohfiledir, self.cohfilelist)
-            
+        
+
 if __name__ == "__main__":
     config_file_path = "C:\\Users\\sheec\\Desktop\\Projects\\PyRate\\sample_data\\input_parameters.conf"
     config = Configration(config_file_path)
-    print(config.__dict__)
+
 
 
 
