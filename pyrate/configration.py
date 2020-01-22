@@ -15,6 +15,36 @@
 #   limitations under the License.
 from configparser import ConfigParser
 from default_parameters import PYRATE_DEFAULT_CONFIGRATION
+import pathlib
+
+
+def set_parameter_value(data_type, input_value, default_value):
+    if len(input_value) < 1:
+        input_value = None
+    if input_value is not None:
+        if data_type in ["dir", "file", "fileList"]:
+            return pathlib.Path(input_value)
+        return data_type(input_value)
+    return default_value
+
+
+def validate_parameter_value(input_name, input_value, min_value=None, max_value=None, possible_values=None):
+    if isinstance(input_value, pathlib.PurePath):
+        if input_name in "outdir":
+            input_value = input_value.parents[0]
+        if not pathlib.Path.exists(input_value):
+            raise ValueError("Given path: " + str(input_value) + " dose not exist.")
+    if min_value is not None:
+        if input_value < min_value:
+            raise ValueError("Invalid value for "+input_name+" supplied: "+input_value+". Please provided a valid value greater than "+min_value+".")
+    if max_value is not None:
+        if input_value > max_value:
+            raise ValueError("Invalid value for "+input_name+" supplied: "+input_value+". Please provided a valid value less than "+max_value+".")
+
+    if possible_values is not None:
+        if input_value not in possible_values:
+            raise ValueError("Invalid value for " + input_name + " supplied: " + input_value + ". Please provided a valid value from with in: " + str(possible_values) + ".")
+    return True
 
 
 class Configration():
@@ -29,9 +59,15 @@ class Configration():
         for key, value in parser._sections["root"].items():
             self.__dict__[key] = value
 
-        # check if required values are supplied
+        # Validate required parameters exist.
         if not set(PYRATE_DEFAULT_CONFIGRATION).issubset(self.__dict__):
-            raise ValueError("Required configration parameters: " + str(set(PYRATE_DEFAULT_CONFIGRATION).difference(self.__dict__)) + " are missing from input config file.")
+            raise ValueError("Required configuration parameters: " + str(set(PYRATE_DEFAULT_CONFIGRATION).difference(self.__dict__)) + " are missing from input config file.")
+
+        # handle control parameters
+        for parameter_name in PYRATE_DEFAULT_CONFIGRATION:
+            self.__dict__[parameter_name] = set_parameter_value(PYRATE_DEFAULT_CONFIGRATION[parameter_name]["DataType"], self.__dict__[parameter_name], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["DefaultValue"])
+            validate_parameter_value(parameter_name, self.__dict__[parameter_name], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["MinValue"], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["MaxValue"], PYRATE_DEFAULT_CONFIGRATION[parameter_name]["PossibleValues"])
+
 
 if __name__ == "__main__":
     config_file_path = "C:\\Users\\sheec\\Desktop\\Projects\\PyRate\\sample_data\\input_parameters.conf"
