@@ -230,14 +230,12 @@ def _ref_phase_estimation(ifg_paths, params, refpx, refpy):
         ifgs = [Ifg(ifg_path) for ifg_path in ifg_paths]
     return ref_phs, ifgs
 
-def main(ifg_paths, params, rows, cols):
+def main(ifg_paths, params):
     """
     Top level function to perform PyRate workflow on given interferograms
 
     :param list ifg_paths: List of interferogram paths
     :param dict params: Dictionary of configuration parameters
-    :param int rows: Number of sub-tiles in y direction
-    :param int cols: Number of sub-tiles in x direction
 
     :return: refpt: tuple of reference pixel x and y position
     :rtype: tuple
@@ -248,6 +246,8 @@ def main(ifg_paths, params, rows, cols):
     """
     if mpiops.size > 1:  # turn of multiprocessing during mpi jobs
         params[cf.PARALLEL] = False
+
+    rows, cols = params["rows"], params["cols"]
     tiles = mpiops.run_once(get_tiles, ifg_paths[0], rows, cols)
 
     preread_ifgs = _create_ifg_dict(ifg_paths, params=params, tiles=tiles)

@@ -14,10 +14,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 from configparser import ConfigParser
-from default_parameters import PYRATE_DEFAULT_CONFIGRATION
+import multiprocessing
 import pathlib
 import re
 
+from default_parameters import PYRATE_DEFAULT_CONFIGRATION
+from core.user_experience import break_number_into_factors
 
 def set_parameter_value(data_type, input_value, default_value, required, input_name):
     if len(input_value) < 1:
@@ -94,12 +96,45 @@ class Configration():
         validate_file_list_values(self.slcFileDir, self.slcfilelist, 1)
         if self.cohfiledir is not None or self.cohfilelist is not None:
             validate_file_list_values(self.cohfiledir, self.cohfilelist)
-        
+
+        # bespoke parameter validation
+        if self.refchipsize % 2 != 1:
+            raise ValueError("Configuration parameters refchipsize must be odd: " + str(self.refchipsize))
+
+        self.rows, self.cols = [int(no) for no in break_number_into_factors(multiprocessing.cpu_count())]
+
+        # create a temporary directory
+        self.tmpdir = self.outdir/"tmpdir"
+        self.tmpdir.mkdir(parents=True, exist_ok=True)
+        self.tmpdir = str(self.tmpdir)
+
+        # create list of of unwrapped interferogram
+        # self.unwrapped_interferogram = []
+        # for path_str in self.ifgfilelist.read_text().split('\n'):
+        #     # ignore empty lines in file
+        #     if len(path_str) > 1:
+        #         self.unwrapped_interferogram.append(str(self.obsdir / path_str))
+
+        # check if all the epochs in interferogram are in headers too
+        # check min number of epoches
+        # check bounds for  ifglksx ifglksy ifgxlast ifgyfirst
+
+        # backward compatibility for string paths
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], pathlib.PurePath):
+                self.__dict__[key] = str(self.__dict__[key])
+        # var no longer used
+        self.APS_ELEVATION_EXT = None
+        self.APS_INCIDENCE_EXT = None
+        self.apscorrect = 0
+        self.apsmethod = 0
+        self.elevationmap = None
+        self.incidencemap = None
 
 if __name__ == "__main__":
     config_file_path = "C:\\Users\\sheec\\Desktop\\Projects\\PyRate\\sample_data\\input_parameters.conf"
-    config = Configration(config_file_path)
-
+    config = Configration(config_file_path).__dict__
+    print(config)
 
 
 

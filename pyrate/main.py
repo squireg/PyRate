@@ -21,19 +21,17 @@ import logging
 import argparse
 from argparse import RawTextHelpFormatter
 
-from constants import CLI_DESCRIPTION, CONV2TIF, PREPIFG, PROCESS, MERGE
-from core import config as cf
+from constants import CLI_DESCRIPTION
 import conv2tif, prepifg, process, merge
 from core import pyratelog
 from core import user_experience
 import time
-import multiprocessing
 from shutil import copyfile
 
-from core.user_experience import break_number_into_factors
 from core.config import OBS_DIR, OUT_DIR
 import pathlib
-
+from configration import Configration
+from core.validation import validate_conv2tif_parameters, validate_prepifg_parameters, validate_process_parameters, validate_merge_parameters
 # Turn off MPI warning
 os.environ['OMPI_MCA_btl_base_warn_component_unused'] = '0'
 
@@ -45,8 +43,9 @@ def conv2tif_handler(config_file):
     Convert interferograms to geotiff.
     """
     config_file = os.path.abspath(config_file)
-    params = cf.get_config_params(config_file, step=CONV2TIF)
-    conv2tif.main(params)
+    params = Configration(config_file)
+    validate_conv2tif_parameters(params)
+    conv2tif.main(params.__dict__)
 
 
 def prepifg_handler(config_file):
@@ -54,44 +53,45 @@ def prepifg_handler(config_file):
     Perform multilooking and cropping on geotiffs.
     """
     config_file = os.path.abspath(config_file)
-    params = cf.get_config_params(config_file, step=PREPIFG)
-    prepifg.main(params)
+    params = Configration(config_file)
+    validate_prepifg_parameters(params)
+    prepifg.main(params.__dict__)
 
-    for p in pathlib.Path(params[OUT_DIR]).rglob("*rlks_*cr.tif"):
+    for p in pathlib.Path(params.__dict__[OUT_DIR]).rglob("*rlks_*cr.tif"):
         if "dem" not in str(p):
             src = str(p)
-            dst = os.path.join(params[OBS_DIR],p.name)
+            dst = os.path.join(params.__dict__[OBS_DIR], p.name)
             copyfile(src, dst)
 
 
-def process_handler(config_file, rows, cols):
+def process_handler(config_file):
     """
     Time series and linear rate computation.
     """
     config_file = os.path.abspath(config_file)
-    _, dest_paths, params = cf.get_ifg_paths(config_file, step=PROCESS)
+    params = Configration(config_file)
+    validate_process_parameters(params)
 
     dest_paths = []
-    for p in pathlib.Path(params[OBS_DIR]).rglob("*rlks_*cr.tif"):
+    for p in pathlib.Path(params.__dict__[OBS_DIR]).rglob("*rlks_*cr.tif"):
         if "dem" not in str(p):
             dest_paths.append(str(p))
 
-    process.main(sorted(dest_paths), params, rows, cols)
+    process.main(sorted(dest_paths), params.__dict__)
 
 
-def merge_handler(config_file, rows, cols):
+def merge_handler(config_file):
     """
     Reassemble computed tiles and save as geotiffs.
     """
     config_file = os.path.abspath(config_file)
-    _, _, params = cf.get_ifg_paths(config_file, step=MERGE)
-    merge.main(params, rows, cols)
+    params = Configration(config_file)
+    validate_merge_parameters(params)
+    merge.main(params.__dict__)
     user_experience.delete_tsincr_files(params)
 
 
 def main():
-
-    rows, cols = [int(no) for no in break_number_into_factors(multiprocessing.cpu_count())]
 
     start_time = time.time()
     log.debug("Starting PyRate")
@@ -130,10 +130,10 @@ def main():
         prepifg_handler(args.config_file)
 
     if args.command == "process":
-        process_handler(args.config_file, rows, cols)
+        process_handler(args.config_file)
 
     if args.command == "merge":
-        merge_handler(args.config_file, rows, cols)
+        merge_handler(args.config_file)
 
     log.debug("--- %s seconds ---" % (time.time() - start_time))
 
