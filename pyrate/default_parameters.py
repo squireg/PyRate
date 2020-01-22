@@ -2,63 +2,63 @@ YEARS_PER_DAY = 1 / 365.25
 
 PYRATE_DEFAULT_CONFIGRATION = {
     "obsdir": {
-        "DataType": "dir",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "ifgfilelist": {
-        "DataType": "fileList",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "demfile": {
-        "DataType": "file",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "demHeaderFile": {
-        "DataType": "file",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "slcFileDir": {
-        "DataType": "dir",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "slcfilelist": {
-        "DataType": "fileList",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "cohfiledir": {
-        "DataType": "dir",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "cohfilelist": {
-        "DataType": "fileList",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,
         "PossibleValues": None
     },
     "outdir": {
-        "DataType": "dir",
+        "DataType": "path",
         "DefaultValue": None,
         "MinValue": None,
         "MaxValue": None,

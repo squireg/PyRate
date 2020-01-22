@@ -22,7 +22,7 @@ def set_parameter_value(data_type, input_value, default_value):
     if len(input_value) < 1:
         input_value = None
     if input_value is not None:
-        if data_type in ["dir", "file", "fileList"]:
+        if str(data_type) in "path":
             return pathlib.Path(input_value)
         return data_type(input_value)
     return default_value
@@ -72,7 +72,6 @@ class Configration():
 if __name__ == "__main__":
     config_file_path = "C:\\Users\\sheec\\Desktop\\Projects\\PyRate\\sample_data\\input_parameters.conf"
     config = Configration(config_file_path)
-    print(set(PYRATE_DEFAULT_CONFIGRATION))
     print(config.__dict__)
 
 
