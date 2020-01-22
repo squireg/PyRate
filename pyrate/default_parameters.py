@@ -1,3 +1,5 @@
+YEARS_PER_DAY = 1 / 365.25
+
 PYRATE_DEFAULT_CONFIGRATION = {
     "obsdir": {
         "DataType": "dir",
@@ -304,7 +306,7 @@ PYRATE_DEFAULT_CONFIGRATION = {
     "tlpfcutoff": {
         "DataType": float,
         "DefaultValue": 1.0,
-        "MinValue": None,
+        "MinValue": YEARS_PER_DAY,
         "MaxValue": None,
         "PossibleValues": None
     },
