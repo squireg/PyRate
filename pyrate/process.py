@@ -94,10 +94,8 @@ def _create_ifg_dict(dest_tifs, params, tiles):
         cp.dump(ifgs_dict, open(preread_ifgs_file, 'wb'))
 
     mpiops.comm.barrier()
-    preread_ifgs = OrderedDict(sorted(cp.load(open(preread_ifgs_file,
-                                                   'rb')).items()))
-    log.debug('Finished converting phase_data to numpy '
-             'in process {}'.format(mpiops.rank))
+    preread_ifgs = OrderedDict(sorted(cp.load(open(preread_ifgs_file, 'rb')).items()))
+    log.debug('Finished converting phase_data to numpy in process {}'.format(mpiops.rank))
     return preread_ifgs
 
 
@@ -230,11 +228,11 @@ def _ref_phase_estimation(ifg_paths, params, refpx, refpy):
         ifgs = [Ifg(ifg_path) for ifg_path in ifg_paths]
     return ref_phs, ifgs
 
-def main(ifg_paths, params):
+
+def main(params):
     """
     Top level function to perform PyRate workflow on given interferograms
 
-    :param list ifg_paths: List of interferogram paths
     :param dict params: Dictionary of configuration parameters
 
     :return: refpt: tuple of reference pixel x and y position
@@ -244,6 +242,7 @@ def main(ifg_paths, params):
     :return: vcmt: Variance-covariance matrix array
     :rtype: ndarray
     """
+    ifg_paths = params["sampled_interferogram_paths"]
     if mpiops.size > 1:  # turn of multiprocessing during mpi jobs
         params[cf.PARALLEL] = False
 

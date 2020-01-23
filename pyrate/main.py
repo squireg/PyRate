@@ -61,12 +61,6 @@ def prepifg_handler(config_file):
     validate_prepifg_parameters(params)
     prepifg.main(params.__dict__)
 
-    for p in pathlib.Path(params.__dict__[OUT_DIR]).rglob("*rlks_*cr.tif"):
-        if "dem" not in str(p):
-            src = str(p)
-            dst = os.path.join(params.__dict__[OBS_DIR], p.name)
-            copyfile(src, dst)
-
 
 def process_handler(config_file):
     """
@@ -76,12 +70,7 @@ def process_handler(config_file):
     params = Configration(config_file)
     validate_process_parameters(params)
 
-    dest_paths = []
-    for p in pathlib.Path(params.__dict__[OBS_DIR]).rglob("*rlks_*cr.tif"):
-        if "dem" not in str(p):
-            dest_paths.append(str(p))
-
-    process.main(sorted(dest_paths), params.__dict__)
+    process.main(params.__dict__)
 
 
 def merge_handler(config_file):
@@ -92,7 +81,7 @@ def merge_handler(config_file):
     params = Configration(config_file)
     validate_merge_parameters(params)
     merge.main(params.__dict__)
-    user_experience.delete_tsincr_files(params)
+    user_experience.delete_tsincr_files(params.__dict__)
 
 
 def main():

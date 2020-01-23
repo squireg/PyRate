@@ -108,12 +108,30 @@ class Configration():
         self.tmpdir.mkdir(parents=True, exist_ok=True)
         self.tmpdir = str(self.tmpdir)
 
-        # create list of of unwrapped interferogram
-        # self.unwrapped_interferogram = []
-        # for path_str in self.ifgfilelist.read_text().split('\n'):
-        #     # ignore empty lines in file
-        #     if len(path_str) > 1:
-        #         self.unwrapped_interferogram.append(str(self.obsdir / path_str))
+        # create list of unwrapped interferogram
+        # 20061106-20070115_utm.unw
+        self.unwrapped_interferogram = []
+        for path_str in self.ifgfilelist.read_text().split('\n'):
+            # ignore empty lines in file
+            if len(path_str) > 1:
+                self.unwrapped_interferogram.append(str(self.obsdir / path_str))
+
+        # 20061106-20070115_utm_unw.tif
+        self.converted_interferogram_paths = []
+        for path_str in self.ifgfilelist.read_text().split('\n'):
+            # ignore empty lines in file
+            if len(path_str) > 1:
+                if ".tif" in path_str:
+                    self.converted_interferogram_paths.append(str(self.obsdir / path_str))
+                else:
+                    path_str = path_str.split(".")
+                    path_str = path_str[0]+"_"+path_str[1]+".tif"
+                    self.converted_interferogram_paths.append(str(self.obsdir / path_str))
+
+        # 20061106-20070115_utm_unw_1rlks_4cr.tif
+        self.sampled_interferogram_paths = []
+        for converted_interferogram_path in self.converted_interferogram_paths:
+            self.sampled_interferogram_paths.append(converted_interferogram_path.split(".tif")[0] + "_"+str(self.ifglksx)+"rlks_"+str(self.ifgcropopt)+"cr.tif")
 
         # check if all the epochs in interferogram are in headers too
         # check min number of epoches
@@ -134,7 +152,6 @@ class Configration():
 if __name__ == "__main__":
     config_file_path = "C:\\Users\\sheec\\Desktop\\Projects\\PyRate\\sample_data\\input_parameters.conf"
     config = Configration(config_file_path).__dict__
-    print(config)
 
 
 
