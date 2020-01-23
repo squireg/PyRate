@@ -41,7 +41,6 @@ def main(params):
     # the important pyrate stuff anyway, but might affect gen_thumbs.py.
     # Going to assume base_ifg_paths is ordered correcly
     # pylint: disable=too-many-branches
-    usage = 'Usage: pyrate prepifg <config_file>'
     if mpiops.size > 1:  # Over-ride input options if this is an MPI job
         log.debug("Running using mpi processing. Disabling parallel processing.")
         params[cf.PARALLEL] = False
@@ -59,7 +58,7 @@ def main(params):
         if params[cf.APS_ELEVATION_MAP]:
             base_ifg_paths.append(params[cf.APS_ELEVATION_MAP])
 
-    shared.mkdir_p(params[cf.OUT_DIR]) # create output dir
+    shared.mkdir_p(params[cf.OUT_DIR])  # create output dir
 
     process_base_ifgs_paths = np.array_split(base_ifg_paths, mpiops.size)[mpiops.rank]
     gtiff_paths = [shared.output_tiff_filename(f, params[cf.OBS_DIR]) for f in process_base_ifgs_paths]
@@ -80,7 +79,7 @@ def do_prepifg(gtiff_paths, params):
 
     for f in gtiff_paths:
         if not os.path.isfile(f):
-            raise Exception("Can not find geotiff: " + str(f) + ". Ensure you have converted your interferograms to geotiffs.")
+            raise Exception("Cannot find geotiff: " + str(f) + ". Ensure you have converted your interferograms to geotiffs.")
 
     ifgs = [prepifg_helper.dem_or_ifg(p) for p in gtiff_paths]
     xlooks, ylooks, crop = cf.transform_params(params)
@@ -106,9 +105,11 @@ def _prepifg_multiprocessing(path, xlooks, ylooks, exts, thresh, crop, params):
     processor = params[cf.PROCESSOR]  # roipac or gamma
     # GAMMA = 1
     if processor == 1:
+        log.debug("Reading GAMMA header."+str(path))
         header = gamma.gamma_header(path, params)
     # ROIPAC = 0
     elif processor == 0:
+        log.debug("Reading ROIPAC header."+str(path))
         header = roipac.roipac_header(path, params)
     else:
         raise PreprocessError('Processor must be ROI_PAC (0) or GAMMA (1)')
@@ -118,6 +119,7 @@ def _prepifg_multiprocessing(path, xlooks, ylooks, exts, thresh, crop, params):
         coherence_path = cf.coherence_paths_for(path, params, tif=True)[0]
         coherence_thresh = params[cf.COH_THRESH]
     else:
+        log.debug("Coherence not set.")
         coherence_path = None
         coherence_thresh = None
 

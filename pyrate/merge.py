@@ -34,6 +34,7 @@ from core.shared import PrereadIfg
 gdal.SetCacheMax(64)
 log = logging.getLogger(__name__)
 
+
 def main(params):
     """
     PyRate merge main function. Assembles product tiles in to

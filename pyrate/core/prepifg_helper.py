@@ -165,12 +165,20 @@ def prepare_ifg(raster_path, xlooks, ylooks, exts, thresh, crop_opt, write_to_di
     # resolution=None completes faster for non-multilooked layers in gdalwarp
     resolution = [None, None]
     raster = dem_or_ifg(raster_path)
+    log.debug("raster.data_path: " + str(raster.data_path))
     if not raster.is_open:
         raster.open()
     if do_multilook:
+        log.debug("Doing do_multilook.")
         resolution = [xlooks * raster.x_step, ylooks * raster.y_step]
     if not do_multilook and crop_opt == ALREADY_SAME_SIZE:
+
+        log.debug("xlooks: " + str(xlooks))
+        log.debug("crop_opt: " + str(crop_opt))
+
         renamed_path = cf.mlooked_path(raster.data_path, looks=xlooks, crop_out=crop_opt)
+        log.debug("renamed_path: " + str(renamed_path))
+
         shutil.copy(raster.data_path, renamed_path)
         # set metadata to indicated has been cropped and multilooked
         # copy file with mlooked path
