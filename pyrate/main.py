@@ -16,22 +16,26 @@
 """
 This Python module defines executable run configuration for the PyRate software
 """
-import os
-import logging
 import argparse
-from argparse import RawTextHelpFormatter
-
-from constants import CLI_DESCRIPTION
-import conv2tif, prepifg, process, merge
-from core import pyratelog
-from core import user_experience
+import logging
+import os
+import pathlib
 import time
+from argparse import RawTextHelpFormatter
 from shutil import copyfile
 
-from core.config import OBS_DIR, OUT_DIR
-import pathlib
+import conv2tif
+import merge
+import prepifg
+import process
 from configration import Configration
-from core.validation import validate_conv2tif_parameters, validate_prepifg_parameters, validate_process_parameters, validate_merge_parameters
+from constants import CLI_DESCRIPTION
+from core import pyratelog
+from core import user_experience
+from core.config import OBS_DIR, OUT_DIR
+from core.validation import validate_conv2tif_parameters, validate_prepifg_parameters, validate_process_parameters, \
+    validate_merge_parameters
+
 # Turn off MPI warning
 os.environ['OMPI_MCA_btl_base_warn_component_unused'] = '0'
 
