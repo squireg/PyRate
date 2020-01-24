@@ -22,7 +22,6 @@ import os
 import pathlib
 import time
 from argparse import RawTextHelpFormatter
-from shutil import copyfile
 
 import conv2tif
 import merge
@@ -32,15 +31,29 @@ from configration import Configration
 from constants import CLI_DESCRIPTION
 from core import pyratelog
 from core import user_experience
-from core.config import OBS_DIR, OUT_DIR
 from core.validation import validate_conv2tif_parameters, validate_prepifg_parameters, validate_process_parameters, \
     validate_merge_parameters
 
 # Turn off MPI warning
 os.environ['OMPI_MCA_btl_base_warn_component_unused'] = '0'
+import logging
 
 log = logging.getLogger(__name__)
 
+log.setLevel(logging.DEBUG)
+# create file handler which logs even debug messages
+fh = logging.FileHandler('logfile.log')
+fh.setLevel(logging.DEBUG)
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+# add the handlers to the logger
+log.addHandler(fh)
+log.addHandler(ch)
 
 def conv2tif_handler(config_file):
     """
