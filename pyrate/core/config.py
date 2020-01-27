@@ -550,7 +550,7 @@ def get_ifg_paths(config_file, step=CONV2TIF):
 
     :param str config_file: Configuration file path
 
-    :return: base_unw_paths: List of unwrapped inteferograms
+    :return: unwrapped_interferogram_paths: List of unwrapped inteferograms
     :return: dest_paths: List of multi-looked and cropped geotifs
     :return: params: Dictionary corresponding to the config file
     :rtype: list
@@ -562,7 +562,7 @@ def get_ifg_paths(config_file, step=CONV2TIF):
 
     xlks, _, crop = transform_params(params)
 
-    # base_unw_paths need to be geotiffed by conv2tif and multilooked by prepifg
+    # unwrapped_interferogram_paths need to be geotiffed by conv2tif and multilooked by prepifg
     base_unw_paths = original_ifg_paths(ifg_file_list, params[OBS_DIR])
 
     # dest_paths are tifs that have been coherence masked (if enabled),
@@ -570,11 +570,11 @@ def get_ifg_paths(config_file, step=CONV2TIF):
 
     if "tif" in base_unw_paths[0].split(".")[1]:
 
-        dest_paths = base_unw_paths # get_dest_paths(base_unw_paths, crop, params, xlks)
+        dest_paths = base_unw_paths # get_dest_paths(unwrapped_interferogram_paths, crop, params, xlks)
         for i, dest_path in enumerate(dest_paths):
             dest_paths[i] = dest_path.replace("_tif","")
     else:
-        dest_paths = base_unw_paths # get_dest_paths(base_unw_paths, crop, params, xlks)
+        dest_paths = base_unw_paths # get_dest_paths(unwrapped_interferogram_paths, crop, params, xlks)
 
     return base_unw_paths, dest_paths, params
 

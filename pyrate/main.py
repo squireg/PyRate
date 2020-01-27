@@ -62,7 +62,7 @@ def conv2tif_handler(config_file):
     config_file = os.path.abspath(config_file)
     params = Configration(config_file)
     validate_conv2tif_parameters(params)
-    conv2tif.main(params.__dict__)
+    conv2tif.main(params)
 
 
 def prepifg_handler(config_file):
