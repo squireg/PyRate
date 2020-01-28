@@ -1,5 +1,5 @@
 from osgeo import osr, gdal
-from constants import GDAL_CACHE_MAX
+from constants import GDAL_CACHE_MAX, NO_OF_PARALLEL_PROCESSES
 import os
 import time
 import multiprocessing
@@ -22,7 +22,7 @@ def main(config):
         log.info("Updating GeoTIFF header information.")
 
         # Init multiprocessing.Pool()
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        pool = multiprocessing.Pool(NO_OF_PARALLEL_PROCESSES)
 
         # Running pools
         pool.map(geotiff.update_header, [(config, interferogram_file) for interferogram_file in config.interferogram_files])
@@ -50,7 +50,7 @@ def main(config):
     else:
         log.info("ROIPAC processor selected.")
         # Init multiprocessing.Pool()
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        pool = multiprocessing.Pool(NO_OF_PARALLEL_PROCESSES)
 
         # Running pools
         pool.map(roipac.convert_roipac_interferogram, [(config, interferogram_file) for interferogram_file in config.interferogram_files])

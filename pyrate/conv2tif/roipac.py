@@ -9,7 +9,7 @@ import multiprocessing
 import pathlib
 import logging
 
-os.environ['NUMEXPR_MAX_THREADS'] = str(multiprocessing.cpu_count())
+os.environ['NUMEXPR_MAX_THREADS'] = str(NO_OF_PARALLEL_PROCESSES)
 log = logging.getLogger(__name__)
 
 

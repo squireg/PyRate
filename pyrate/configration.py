@@ -17,7 +17,7 @@ from configparser import ConfigParser
 import multiprocessing
 import pathlib
 import re
-
+from constants import NO_OF_PARALLEL_PROCESSES
 from default_parameters import PYRATE_DEFAULT_CONFIGRATION
 from core.user_experience import break_number_into_factors
 
@@ -139,6 +139,7 @@ class Configration():
             raise ValueError("Configuration parameters refchipsize must be odd: " + str(self.refchipsize))
 
         self.rows, self.cols = [int(no) for no in break_number_into_factors(multiprocessing.cpu_count())]
+        self.rows, self.cols = [int(no) for no in break_number_into_factors(NO_OF_PARALLEL_PROCESSES)]
 
         # create a temporary directory
         self.tmpdir = self.outdir / "tmpdir"

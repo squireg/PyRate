@@ -10,7 +10,7 @@ import logging
 import multiprocessing
 
 # make numpy thread safe
-os.environ['NUMEXPR_MAX_THREADS'] = str(multiprocessing.cpu_count())
+os.environ['NUMEXPR_MAX_THREADS'] = str(NO_OF_PARALLEL_PROCESSES)
 # do not create aux.xml file
 os.environ['GDAL_PAM_ENABLED'] = 'NO'
 # feature root logger for PyRate

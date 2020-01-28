@@ -7,9 +7,8 @@ from conv2tif.utilities import *
 from constants import *
 import pathlib
 import logging
-import multiprocessing
 
-os.environ['NUMEXPR_MAX_THREADS'] = str(multiprocessing.cpu_count())
+os.environ['NUMEXPR_MAX_THREADS'] = str(NO_OF_PARALLEL_PROCESSES)
 log = logging.getLogger(__name__)
 
 

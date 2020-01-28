@@ -33,7 +33,7 @@ import core.orbital
 import common
 from common import (small5_mock_ifgs, small5_ifgs, TEST_CONF_ROIPAC,
     small_data_setup, prepare_ifgs_without_phase)
-
+from constants import NO_OF_PARALLEL_PROCESSES
 
 class CovarianceTests(unittest.TestCase):
     def setUp(self):
@@ -188,7 +188,7 @@ class LegacyEqualityTest(unittest.TestCase):
         conv2tif_handler(TEST_CONF_ROIPAC)
         prepifg_handler(TEST_CONF_ROIPAC)
 
-        rows, cols = [int(no) for no in break_number_into_factors(multiprocessing.cpu_count())]
+        rows, cols = [int(no) for no in break_number_into_factors(NO_OF_PARALLEL_PROCESSES)]
         process_handler(TEST_CONF_ROIPAC, rows, cols)
 
         params = cf.get_config_params(TEST_CONF_ROIPAC)
