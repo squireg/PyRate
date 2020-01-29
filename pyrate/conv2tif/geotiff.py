@@ -83,7 +83,6 @@ def update_gamma_header(parameters):
         'SLAVE_TIME': slave_time,
         'INCIDENCE_DEGREES': str(incidence_angle_mean)
     })
-    log.info(metadata)
     output_dataset.SetMetadata(metadata)
     # manual close dataset
     output_dataset = None
