@@ -50,9 +50,9 @@ def sort_headers(header_paths, interferograms_path):
         Exception("At least two header files are required.")
 
     for header_path in header_paths:
-        epoch = int(find_substring(r'\d{8}', header_path))
+        epoch = int(find_substring(r'\d{8}', header_path.unwrapped_path))
         if epoch and str(epoch) in interferogram_epochs:
-            headers[epoch] = header_path
+            headers[epoch] = header_path.unwrapped_path
 
     epochs = headers.keys()
 
