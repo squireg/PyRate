@@ -72,7 +72,7 @@ def prepifg_handler(config_file):
     config_file = os.path.abspath(config_file)
     params = Configration(config_file)
     validate_prepifg_parameters(params)
-    prepifg.main(params.__dict__)
+    prepifg.main(params.__dict__, params)
 
 
 def process_handler(config_file):
