@@ -14,7 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 from configparser import ConfigParser
-import multiprocessing
 import pathlib
 import re
 from constants import NO_OF_PARALLEL_PROCESSES
@@ -41,14 +40,16 @@ def validate_parameter_value(input_name, input_value, min_value=None, max_value=
             input_value = input_value.parents[0]
         if not pathlib.Path.exists(input_value):
             raise ValueError("Given path: " + str(input_value) + " dose not exist.")
-    if min_value is not None:
-        if input_value < min_value:
-            raise ValueError(
-                "Invalid value for " + input_name + " supplied: " + input_value + ". Please provided a valid value greater than " + min_value + ".")
-    if max_value is not None:
-        if input_value > max_value:
-            raise ValueError(
-                "Invalid value for " + input_name + " supplied: " + input_value + ". Please provided a valid value less than " + max_value + ".")
+    if input_value is not None:
+        if min_value is not None:
+            if input_value < min_value:
+                raise ValueError(
+                    "Invalid value for " + input_name + " supplied: " + input_value + ". Please provided a valid value greater than " + min_value + ".")
+    if input_value is not None:
+        if max_value is not None:
+            if input_value > max_value:
+                raise ValueError(
+                    "Invalid value for " + input_name + " supplied: " + input_value + ". Please provided a valid value less than " + max_value + ".")
 
     if possible_values is not None:
         if input_value not in possible_values:
@@ -92,7 +93,7 @@ class MultiplePaths:
 
     def __str__(self):
         return"""
-unwrapped_path =""" + self.unwrapped_path+""" 
+unwrapped_path = """ + self.unwrapped_path+""" 
 converted_path = """ + self.converted_path+""" 
 sampled_path = """ + self.sampled_path+"""    
 """
@@ -128,12 +129,6 @@ class Configration():
                                      PYRATE_DEFAULT_CONFIGRATION[parameter_name]["MaxValue"],
                                      PYRATE_DEFAULT_CONFIGRATION[parameter_name]["PossibleValues"])
 
-        # Validate file names supplied in list exist and contain correct epochs in file names
-        validate_file_list_values(self.obsdir, self.ifgfilelist, 2)
-        validate_file_list_values(self.slcFileDir, self.slcfilelist, 1)
-        if self.cohfiledir is not None or self.cohfilelist is not None:
-            validate_file_list_values(self.cohfiledir, self.cohfilelist)
-
         # bespoke parameter validation
         if self.refchipsize % 2 != 1:
             raise ValueError("Configuration parameters refchipsize must be odd: " + str(self.refchipsize))
@@ -150,26 +145,6 @@ class Configration():
         self.tmpdir.mkdir(parents=True, exist_ok=True)
         self.tmpdir = str(self.tmpdir)
 
-        self.header_file_paths = []
-        for path_str in self.slcfilelist.read_text().split('\n'):
-            # ignore empty lines in file
-            if len(path_str) > 1:
-                self.header_file_paths.append(str(self.slcFileDir / path_str))
-
-        self.interferogram_files = []
-        for path_str in self.ifgfilelist.read_text().split('\n'):
-            # ignore empty lines in file
-            if len(path_str) > 1:
-                self.interferogram_files.append(MultiplePaths(self.obsdir, path_str, self.ifglksx, self.ifgcropopt))
-
-        # check if all the epochs in interferogram are in headers too
-        # check min number of epoches
-        # check bounds for  ifglksx ifglksy ifgxlast ifgyfirst
-
-        # backward compatibility for string paths
-        for key in self.__dict__:
-            if isinstance(self.__dict__[key], pathlib.PurePath):
-                self.__dict__[key] = str(self.__dict__[key])
         # var no longer used
         self.APS_ELEVATION_EXT = None
         self.APS_INCIDENCE_EXT = None
@@ -178,7 +153,41 @@ class Configration():
         self.elevationmap = None
         self.incidencemap = None
 
-        self.NUMEXPR_MAX_THREADS = str(multiprocessing.cpu_count())
+        # define parallel processes that will run
+        self.NUMEXPR_MAX_THREADS = str(NO_OF_PARALLEL_PROCESSES)
+
+        # Validate file names supplied in list exist and contain correct epochs in file names
+        validate_file_list_values(self.obsdir, self.ifgfilelist, 2)
+        validate_file_list_values(self.slcFileDir, self.slcfilelist, 1)
+
+        self.coherence_file_paths = None
+        if self.cohfiledir is not None and self.cohfilelist is not None:
+            validate_file_list_values(self.cohfiledir, self.cohfilelist)
+            self.coherence_file_paths = []
+            for path_str in self.cohfilelist.read_text().split('\n'):
+                # ignore empty lines in file
+                if len(path_str) > 1:
+                    self.coherence_file_paths.append(MultiplePaths(self.cohfiledir, path_str, self.ifglksx, self.ifgcropopt))
+
+        self.header_file_paths = []
+        for path_str in self.slcfilelist.read_text().split('\n'):
+            # ignore empty lines in file
+            if len(path_str) > 1:
+                self.header_file_paths.append(MultiplePaths(self.slcFileDir, path_str, self.ifglksx, self.ifgcropopt))
+
+        self.interferogram_files = []
+        for path_str in self.ifgfilelist.read_text().split('\n'):
+            # ignore empty lines in file
+            if len(path_str) > 1:
+                self.interferogram_files.append(MultiplePaths(self.obsdir, path_str, self.ifglksx, self.ifgcropopt))
+
+        self.dem_file_path = MultiplePaths(self.demfile.parents[0], self.demfile.name, self.ifglksx, self.ifgcropopt)
+
+        # backward compatibility for string paths
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], pathlib.PurePath):
+                self.__dict__[key] = str(self.__dict__[key])
+
 
 if __name__ == "__main__":
     config_file_path = "C:\\Users\\sheec\\Desktop\\Projects\\PyRate\\sample_data\\input_parameters.conf"
