@@ -131,7 +131,7 @@ PYRATE_DEFAULT_CONFIGRATION = {
     },
     "cohthresh": {
         "DataType": float,
-        "DefaultValue": 0.1,
+        "DefaultValue": None,
         "MinValue": 0.0,
         "MaxValue": 1.0,
         "PossibleValues": None,
