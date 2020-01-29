@@ -309,7 +309,7 @@ class WriteUnwTest(unittest.TestCase):
         cls.params[cf.PARALLEL] = 0
         cls.params[cf.REF_EST_METHOD] = 1
         cls.params[cf.DEM_FILE] = common.SML_TEST_DEM_GAMMA
-        # base_unw_paths need to be geotiffed and multilooked by run_prepifg
+        # unwrapped_interferogram_paths need to be geotiffed and multilooked by run_prepifg
         cls.base_unw_paths = cf.original_ifg_paths(
             cls.params[cf.IFG_FILE_LIST], cls.params[cf.OBS_DIR])
         cls.base_unw_paths.append(common.SML_TEST_DEM_GAMMA)
@@ -318,7 +318,7 @@ class WriteUnwTest(unittest.TestCase):
         # dest_paths are tifs that have been geotif converted and multilooked
         conv2tif.main(cls.params)
         prepifg.main(cls.params)
-        # run_prepifg.gamma_prepifg(cls.base_unw_paths, cls.params)
+        # run_prepifg.gamma_prepifg(cls.unwrapped_interferogram_paths, cls.params)
         cls.base_unw_paths.pop()  # removed dem as we don't want it in ifgs
 
         cls.dest_paths = cf.get_dest_paths(
@@ -399,7 +399,7 @@ class WriteUnwTest(unittest.TestCase):
     #         g_ds = None
 
     # def test_roipac_raises(self):
-    #     geotiffs = [os.path.join(self.params[cf.OUT_DIR], os.path.basename(b).split('.')[0] + "_" + os.path.basename(b).split('.')[1] + '.tif') for b in self.base_unw_paths]
+    #     geotiffs = [os.path.join(self.params[cf.OUT_DIR], os.path.basename(b).split('.')[0] + "_" + os.path.basename(b).split('.')[1] + '.tif') for b in self.unwrapped_interferogram_paths]
     #
     #     for g in geotiffs[:1]:
     #         dest_unw = os.path.join(self.params[cf.OUT_DIR], os.path.splitext(g)[0] + '.unw')

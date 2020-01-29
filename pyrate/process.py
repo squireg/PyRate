@@ -242,7 +242,10 @@ def main(params):
     :return: vcmt: Variance-covariance matrix array
     :rtype: ndarray
     """
-    ifg_paths = params["sampled_interferogram_paths"]
+    ifg_paths = []
+    for interferogram_file in params["interferogram_files"]:
+        ifg_paths.append(interferogram_file.sampled_path)
+
     if mpiops.size > 1:  # turn of multiprocessing during mpi jobs
         params[cf.PARALLEL] = False
 

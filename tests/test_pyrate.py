@@ -210,7 +210,7 @@ class ParallelPyRateTests(unittest.TestCase):
 
         xlks, ylks, crop = cf.transform_params(params)
 
-        # base_unw_paths need to be geotiffed by converttogeotif 
+        # unwrapped_interferogram_paths need to be geotiffed by converttogeotif
         #  and multilooked by run_prepifg
         base_unw_paths = cf.original_ifg_paths(params[cf.IFG_FILE_LIST],
                                                params[cf.OBS_DIR])
