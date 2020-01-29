@@ -21,22 +21,21 @@ the computational problem.
 """
 # pylint: disable=too-many-arguments,invalid-name
 import os
-import shutil
 from math import modf
 from numbers import Number
 from subprocess import check_call
 from tempfile import mkstemp
 
-from numpy import array, where, nan, isnan, nanmean, float32, zeros, \
-    sum as nsum
+from numpy import array, where, nan, isnan, nanmean, float32, zeros, sum as nsum
 from osgeo import gdal
 
 import constants
 from constants import MINIMUM_CROP, MAXIMUM_CROP, CUSTOM_CROP, ALREADY_SAME_SIZE, CROP_OPTIONS, GRID_TOL
-from core.gdal_python import crop_resample_average
-from core import config as cf
-from core.shared import Ifg, DEM, output_tiff_filename
+from core.shared import Ifg, DEM
 import logging
+
+from prepifg.utilities import prepare_ifg
+
 log = logging.getLogger(__name__)
 
 
@@ -139,54 +138,6 @@ def _get_extents(ifgs, crop_opt, user_exts=None):
     return extents
 
 
-def prepare_ifg(raster_path, xlooks, ylooks, exts, thresh, crop_opt, write_to_disk=True, out_path=None, header=None, coherence_path=None, coherence_thresh=None):
-    """
-    Open, resample, crop and optionally save to disk an interferogram or DEM.
-    Returns are only given if write_to_disk=False
-
-    :param str raster_path: Input raster file path name
-    :param int xlooks: Number of multi-looks in x; 5 is 5 times smaller,
-        1 is no change
-    :param int ylooks: Number of multi-looks in y
-    :param tuple exts: Tuple of user defined georeferenced extents for
-        new file: (xfirst, yfirst, xlast, ylast)cropping coordinates
-    :param float thresh: see thresh in prepare_ifgs()
-    :param int crop_opt: Crop option
-    :param bool write_to_disk: Write new data to disk
-    :param str out_path: Path for output file
-    :param dict header: dictionary of metadata from header file
-
-    :return: resampled_data: output cropped and resampled image
-    :rtype: ndarray
-    :return: out_ds: destination gdal dataset object
-    :rtype: gdal.Dataset
-    """
-    do_multilook = xlooks > 1 or ylooks > 1
-    # resolution=None completes faster for non-multilooked layers in gdalwarp
-    resolution = [None, None]
-    raster = dem_or_ifg(raster_path)
-    log.debug("raster.data_path: " + str(raster.data_path))
-    if not raster.is_open:
-        raster.open()
-    if do_multilook:
-        log.debug("Doing do_multilook.")
-        resolution = [xlooks * raster.x_step, ylooks * raster.y_step]
-    if not do_multilook and crop_opt == ALREADY_SAME_SIZE:
-
-        log.debug("xlooks: " + str(xlooks))
-        log.debug("crop_opt: " + str(crop_opt))
-
-        renamed_path = cf.mlooked_path(raster.data_path, looks=xlooks, crop_out=crop_opt)
-        log.debug("renamed_path: " + str(renamed_path))
-
-        shutil.copy(raster.data_path, renamed_path)
-        # set metadata to indicated has been cropped and multilooked
-        # copy file with mlooked path
-        return _dummy_warp(renamed_path)
-
-    return _warp(raster, xlooks, ylooks, exts, resolution, thresh, crop_opt, write_to_disk, out_path, header, coherence_path, coherence_thresh)
-
-
 # TODO: crop options 0 = no cropping? get rid of same size
 def prepare_ifgs(raster_data_paths, crop_opt, xlooks, ylooks, thresh=0.5, user_exts=None, write_to_disc=True, out_path=None):
     """
@@ -262,33 +213,6 @@ def _dummy_warp(renamed_path):
     data = ifg.dataset.ReadAsArray()
     return data, ifg.dataset
 
-
-def _warp(ifg, x_looks, y_looks, extents, resolution, thresh, crop_out,
-          write_to_disk=True, out_path=None, header=None,
-          coherence_path=None, coherence_thresh=None):
-    """
-    Convenience function for calling GDAL functionality
-    """
-    if x_looks != y_looks:
-        raise ValueError('X and Y looks mismatch')
-
-    # cut, average, resample the final output layers
-    op = output_tiff_filename(ifg.data_path, out_path)
-    looks_path = cf.mlooked_path(op, y_looks, crop_out)
-
-    #     # Add missing/updated metadata to resampled ifg/DEM
-    #     new_lyr = type(ifg)(looks_path)
-    #     new_lyr.open(readonly=True)
-    #     # for non-DEMs, phase bands need extra metadata & conversions
-    #     if hasattr(new_lyr, "phase_band"):
-    #         # TODO: LOS conversion to vertical/horizontal (projection)
-    #         # TODO: push out to workflow
-    #         #if params.has_key(REPROJECTION_FLAG):
-    #         #    reproject()
-    driver_type = 'GTiff' if write_to_disk else 'MEM'
-    resampled_data, out_ds = crop_resample_average( input_tif=ifg.data_path, extents=extents, new_res=resolution, output_file=looks_path, thresh=thresh, out_driver_type=driver_type, hdr=header, coherence_path=coherence_path, coherence_thresh=coherence_thresh)
-    if not write_to_disk:
-        return resampled_data, out_ds
 
 # TODO: Not being used. Remove in future?
 def _resample(data, xscale, yscale, thresh):
