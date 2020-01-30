@@ -150,7 +150,8 @@ def convert_gamma_interferogram(parameters):
         'DATA_TYPE': 'ORIGINAL_IFG',
         'MASTER_TIME': master_time,
         'SLAVE_TIME': slave_time,
-        'INCIDENCE_DEGREES': incidence_angle_mean
+        'INCIDENCE_DEGREES': incidence_angle_mean,
+        'AREA_OR_POINT': "Area"
     }
 
     if metadata is not None:
