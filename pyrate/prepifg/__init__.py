@@ -67,7 +67,7 @@ def main(params, config):
 
     # optional DEM conversion
     if params[cf.DEM_FILE] is not None:
-        list_of_files_to_process.append(params["dem_file_path"])
+        list_of_files_to_process.append(params["dem_file"])
 
     log.info("Preparing interferograms by cropping/multilooking")
 

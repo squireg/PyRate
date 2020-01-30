@@ -181,7 +181,7 @@ class Configration():
             if len(path_str) > 1:
                 self.interferogram_files.append(MultiplePaths(self.obsdir, path_str, self.ifglksx, self.ifgcropopt))
 
-        self.dem_file_path = MultiplePaths(self.demfile.parents[0], self.demfile.name, self.ifglksx, self.ifgcropopt)
+        self.dem_file = MultiplePaths(self.demfile.parents[0], self.demfile.name, self.ifglksx, self.ifgcropopt)
 
         # backward compatibility for string paths
         for key in self.__dict__:
