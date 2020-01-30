@@ -12,14 +12,20 @@ from constants import NO_OF_PARALLEL_PROCESSES
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
-
 def main(config):
     start_time = time.time()
     gdal.SetCacheMax(GDAL_CACHE_MAX)
 
     # check if all the geotiff exist
-    all_geotiff_exists = all(os.path.isfile(interferogram_file.converted_path) for interferogram_file in config.interferogram_files)
-    if all_geotiff_exists:
+    list_of_possible_output_file = []
+
+    list_of_possible_output_file.extend([interferogram_file.converted_path for interferogram_file in config.interferogram_files])
+    list_of_possible_output_file.append(config.dem_file.converted_path)
+    if config.coherence_file_paths is not None:
+        list_of_possible_output_file.extend([interferogram_file.converted_path for interferogram_file in config.coherence_file_paths])
+
+    all_output_geotiff_exists = all(os.path.isfile(output_file) for output_file in list_of_possible_output_file)
+    if all_output_geotiff_exists:
         log.info("Updating GeoTIFF header information.")
 
         # Init multiprocessing.Pool()

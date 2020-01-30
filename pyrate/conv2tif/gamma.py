@@ -14,10 +14,8 @@ log = logging.getLogger(__name__)
 
 def convert_dem_interferogram(config):
 
-    log.info("Start processing: " + str(config.demfile))
+    log.info("Start processing: " + str(config.dem_file.unwrapped_path))
 
-    demfile = pathlib.Path(config.demfile)
-    destination_dem_path = pathlib.Path(demfile.parent.as_posix() + '/' + demfile.stem + '_dem.tif')
 
     # read dem headers
     dem_header = read_raw_header_file(config.demHeaderFile)
@@ -34,7 +32,7 @@ def convert_dem_interferogram(config):
 
     # create an empty dataset
     driver = gdal.GetDriverByName("GTiff")
-    output_dataset = driver.Create(str(destination_dem_path), x_size, y_size, DATA_BANDS, gdal.GDT_Float32, options=['compress=packbits'])
+    output_dataset = driver.Create(str(config.dem_file.converted_path), x_size, y_size, DATA_BANDS, gdal.GDT_Int16, options=['compress=packbits'])
 
     # add geo-spatial info
     geo_transform = [longitude, x_step, 0, latitude, 0, y_step]
@@ -45,12 +43,20 @@ def convert_dem_interferogram(config):
     band = output_dataset.GetRasterBand(1)
     band.SetNoDataValue(NO_DATA_VALUE)
 
+    # set metadata
+    meta_data = output_dataset.GetMetadata()
+    meta_data.update({
+        'AREA_OR_POINT': 'Area',
+        'DATA_TYPE': 'ORIGINAL_DEM'
+    })
+    output_dataset.SetMetadata(meta_data)
+
     # create output dataset
     fmtstr = '!' + ('f' * x_size)
     bytes_per_col = 4
     row_bytes = x_size * bytes_per_col
 
-    with open(demfile, 'rb') as f:
+    with open(config.dem_file.unwrapped_path, 'rb') as f:
         # Read the input array byte by byte and write it to the new dataset
         for y in range(y_size):
             data = struct.unpack(fmtstr, f.read(row_bytes))
@@ -60,7 +66,7 @@ def convert_dem_interferogram(config):
     band.FlushCache()  # Write to disk
     output_dataset = None  # manual close dataset
     del output_dataset
-    log.info("Finish processing interferogram: " + str(destination_dem_path))
+    log.info("Finish processing interferogram: " + str(config.dem_file.converted_path))
 
 
 def convert_gamma_interferogram(parameters):
