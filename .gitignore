@@ -68,4 +68,4 @@ tests/test_data/small_test/gamma_obs/linsamples.npy
 
 *.DS_Store
 
-pyrate/logfile.log
+*pyrate.log
